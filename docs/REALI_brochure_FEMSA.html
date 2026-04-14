@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REALI — Propuesta Comercial</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #08090c;
+  --bg2: #0f1117;
+  --bg3: #181b22;
+  --bg4: #22262f;
+  --surface: #1a1d25;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --text: #eae8e1;
+  --text2: #a3a09a;
+  --text3: #6b6860;
+  --accent: #00e89d;
+  --accent2: #00c281;
+  --blue: #4d9fff;
+  --amber: #ffb340;
+  --coral: #ff6b4a;
+  --purple: #a78bfa;
+  --font: 'DM Sans', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:16px;line-height:1.7;overflow-x:hidden}
+
+/* NAV */
+.topnav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px);background:rgba(8,9,12,0.85);border-bottom:1px solid var(--border);padding:14px 48px;display:flex;justify-content:space-between;align-items:center}
+.topnav .logo{font-weight:700;font-size:18px;letter-spacing:-0.03em;color:var(--accent)}
+.topnav .logo span{color:var(--text3);font-weight:400;font-size:13px;margin-left:10px}
+.nav-links{display:flex;gap:28px}
+.nav-links a{color:var(--text3);text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:120px 48px 80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-200px;right:-200px;width:800px;height:800px;background:radial-gradient(circle,rgba(0,232,157,0.08) 0%,transparent 60%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-100px;left:-100px;width:600px;height:600px;background:radial-gradient(circle,rgba(77,159,255,0.05) 0%,transparent 60%);pointer-events:none}
+.hero-tag{font-family:var(--mono);font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);margin-bottom:20px;opacity:0;animation:fadeUp .8s ease forwards .2s}
+.hero h1{font-size:clamp(42px,6vw,72px);font-weight:700;letter-spacing:-0.04em;line-height:1.05;margin-bottom:24px;opacity:0;animation:fadeUp .8s ease forwards .4s}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .subtitle{font-size:20px;color:var(--text2);max-width:640px;line-height:1.6;opacity:0;animation:fadeUp .8s ease forwards .6s}
+.hero-stats{display:flex;gap:48px;margin-top:56px;opacity:0;animation:fadeUp .8s ease forwards .8s}
+.stat-item .stat-num{font-size:36px;font-weight:700;letter-spacing:-0.03em;color:var(--text)}
+.stat-item .stat-label{font-size:12px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTIONS */
+section{padding:100px 48px;max-width:1200px;margin:0 auto}
+.section-tag{font-family:var(--mono);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.section-title{font-size:36px;font-weight:700;letter-spacing:-0.03em;margin-bottom:12px}
+.section-desc{font-size:17px;color:var(--text2);max-width:600px;margin-bottom:48px}
+
+/* PROBLEM */
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.problem-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;transition:border-color .3s}
+.problem-card:hover{border-color:var(--border2)}
+.problem-card .pc-icon{font-size:28px;margin-bottom:14px}
+.problem-card .pc-title{font-weight:600;font-size:15px;margin-bottom:6px}
+.problem-card .pc-desc{font-size:14px;color:var(--text3);line-height:1.6}
+
+/* FEATURES */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;position:relative;overflow:hidden;transition:border-color .3s,transform .3s}
+.feat:hover{border-color:rgba(0,232,157,0.3);transform:translateY(-2px)}
+.feat-num{font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:14px;letter-spacing:0.1em}
+.feat h3{font-size:17px;font-weight:600;margin-bottom:8px}
+.feat p{font-size:14px;color:var(--text3);line-height:1.6}
+.feat-tag{display:inline-block;margin-top:12px;font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:4px;background:rgba(0,232,157,0.08);color:var(--accent);border:1px solid rgba(0,232,157,0.15)}
+
+/* DATA SOURCES */
+.data-table{width:100%;border-collapse:collapse;margin-top:24px}
+.data-table th{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-align:left;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg3)}
+.data-table td{padding:12px 16px;font-size:14px;color:var(--text2);border-bottom:1px solid var(--border)}
+.data-table tr:hover td{background:var(--bg3)}
+.data-table code{font-family:var(--mono);font-size:12px;background:var(--bg4);padding:2px 8px;border-radius:4px;color:var(--blue)}
+
+/* SCREENSHOT MOCK */
+.screen-mock{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;overflow:hidden;margin:48px 0;box-shadow:0 40px 80px rgba(0,0,0,0.4)}
+.screen-bar{height:36px;background:var(--bg3);display:flex;align-items:center;gap:6px;padding:0 14px;border-bottom:1px solid var(--border)}
+.screen-dot{width:10px;height:10px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2)}
+.screen-body{padding:32px;min-height:320px;display:grid;grid-template-columns:280px 1fr;gap:20px}
+.screen-sidebar{display:flex;flex-direction:column;gap:12px}
+.screen-filter{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text3)}
+.screen-filter .sf-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.screen-filter .sf-value{color:var(--text2);font-size:13px}
+.screen-map{background:var(--bg4);border-radius:12px;position:relative;overflow:hidden;min-height:260px;border:1px solid var(--border)}
+.screen-map::after{content:'Mapa interactivo con puntos de farmacias, clusters y capas de zonas';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:var(--text3);text-align:center;max-width:200px}
+.kpi-row{display:flex;gap:12px;margin-bottom:16px}
+.kpi-mini{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.kpi-mini .km-val{font-size:22px;font-weight:700;color:var(--text)}
+.kpi-mini .km-label{font-size:11px;font-family:var(--mono);color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px}
+.kpi-mini.green .km-val{color:var(--accent)}
+.kpi-mini.coral .km-val{color:var(--coral)}
+
+/* PRICING */
+.pricing-card{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:40px;max-width:560px;margin:0 auto;text-align:center;position:relative;overflow:hidden}
+.pricing-card::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;height:200px;background:radial-gradient(ellipse,rgba(0,232,157,0.1) 0%,transparent 70%);pointer-events:none}
+.pricing-card h3{font-size:24px;font-weight:700;margin-bottom:8px}
+.pricing-card .price{font-size:14px;color:var(--text3);margin-bottom:32px}
+.pricing-items{text-align:left;display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+.pricing-items .pi{display:flex;gap:10px;font-size:14px;color:var(--text2)}
+.pricing-items .pi::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0}
+.cta-btn{display:inline-block;padding:14px 36px;background:var(--accent);color:var(--bg);font-weight:600;font-size:15px;border-radius:8px;text-decoration:none;transition:transform .2s,box-shadow .2s}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,232,157,0.25)}
+
+/* FOOTER */
+footer{padding:48px;text-align:center;border-top:1px solid var(--border);color:var(--text3);font-size:13px}
+footer a{color:var(--accent);text-decoration:none}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .topnav{padding:14px 20px}
+  .hero,.section{padding-left:20px;padding-right:20px}
+  .hero h1{font-size:32px}
+  .hero-stats{flex-direction:column;gap:20px}
+  .problem-grid,.features{grid-template-columns:1fr}
+  .screen-body{grid-template-columns:1fr}
+  .kpi-row{flex-wrap:wrap}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="logo">REALI <span>Inteligencia Territorial</span></div>
+  <div class="nav-links">
+    <a href="#problema">Problema</a>
+    <a href="#solucion">Solución</a>
+    <a href="#datos">Datos</a>
+    <a href="#propuesta">Propuesta</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Propuesta comercial · Abril 2026</div>
+  <h1>Decisiones de expansión<br>con <em>datos reales</em>, no intuición</h1>
+  <div class="subtitle">Dashboard de inteligencia territorial para la industria farmacéutica. Ubicación de competidores, demografía por manzana, aperturas y cierres — todo en un solo lugar.</div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">16</div>
+      <div class="stat-label">Regiones cubiertas</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">~3,500</div>
+      <div class="stat-label">Farmacias mapeadas</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">7+</div>
+      <div class="stat-label">Cadenas identificadas</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">Mensual</div>
+      <div class="stat-label">Actualización de datos</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEMA -->
+<section id="problema">
+  <div class="section-tag">El problema</div>
+  <div class="section-title">Las decisiones de expansión se toman a ciegas</div>
+  <div class="section-desc">Los equipos de real estate farmacéutico enfrentan fricciones reales al evaluar ubicaciones.</div>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="pc-icon">🗺️</div>
+      <div class="pc-title">Información fragmentada</div>
+      <div class="pc-desc">Datos de competidores, demografía y zonas en planillas separadas que nadie cruza de forma sistemática.</div>
+    </div>
+    <div class="problem-card">
+      <div class="pc-icon">⏳</div>
+      <div class="pc-title">Reacción lenta</div>
+      <div class="pc-desc">Cuando detectan que un competidor abrió o cerró, ya perdieron la ventana de oportunidad.</div>
+    </div>
+    <div class="problem-card">
+      <div class="pc-icon">📊</div>
+      <div class="pc-title">Sin visión territorial</div>
+      <div class="pc-desc">No hay forma rápida de visualizar densidad, zonas desatendidas o correlación con NSE.</div>
+    </div>
+    <div class="problem-card">
+      <div class="pc-icon">🔒</div>
+      <div class="pc-title">Datos sensibles, sin control</div>
+      <div class="pc-desc">Las ventas por local son dato estratégico. Subirlas a una plataforma externa no es opción.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUCIÓN -->
+<section id="solucion">
+  <div class="section-tag">La solución</div>
+  <div class="section-title">Un dashboard que centraliza todo</div>
+  <div class="section-desc">Plataforma local — tus datos nunca salen de tu computador. Sin servidores externos, sin riesgos.</div>
+
+  <div class="features">
+    <div class="feat">
+      <div class="feat-num">01</div>
+      <h3>Mapa interactivo</h3>
+      <p>Todas las farmacias del país con filtros por cadena, comuna y zona. Clustering inteligente y popups con detalle.</p>
+      <span class="feat-tag">Leaflet + GeoJSON</span>
+    </div>
+    <div class="feat">
+      <div class="feat-num">02</div>
+      <h3>Filtros inteligentes</h3>
+      <p>Segmenta por industria, cadena, región, comuna y tus propias zonas geográficas. Todo se actualiza en tiempo real.</p>
+      <span class="feat-tag">Interactivo</span>
+    </div>
+    <div class="feat">
+      <div class="feat-num">03</div>
+      <h3>Demografía por manzana</h3>
+      <p>Población, hogares y nivel socioeconómico a nivel de manzana censal. Cruza con densidad de farmacias para encontrar zonas de oportunidad.</p>
+      <span class="feat-tag">INE / Censo</span>
+    </div>
+    <div class="feat">
+      <div class="feat-num">04</div>
+      <h3>KPIs de apertura y cierre</h3>
+      <p>Monitoreo mensual de movimientos de la competencia. Detecta quién abrió, quién cerró, y dónde.</p>
+      <span class="feat-tag">Diff mensual</span>
+    </div>
+    <div class="feat">
+      <div class="feat-num">05</div>
+      <h3>Ventas por cadena</h3>
+      <p>Sube tus datos de venta y visualízalos directamente en el dashboard. El archivo nunca sale de tu equipo.</p>
+      <span class="feat-tag">Upload local</span>
+    </div>
+    <div class="feat">
+      <div class="feat-num">06</div>
+      <h3>Zonas geográficas</h3>
+      <p>Carga tus shapes comerciales y visualízalas como capas sobre el mapa. Compatible con GeoJSON y Shapefile.</p>
+      <span class="feat-tag">GeoJSON / SHP</span>
+    </div>
+  </div>
+
+  <!-- SCREEN MOCK -->
+  <div class="screen-mock">
+    <div class="screen-bar">
+      <div class="screen-dot"></div>
+      <div class="screen-dot"></div>
+      <div class="screen-dot"></div>
+    </div>
+    <div class="screen-body">
+      <div class="screen-sidebar">
+        <div class="kpi-row">
+          <div class="kpi-mini"><div class="km-val">3,487</div><div class="km-label">Farmacias</div></div>
+          <div class="kpi-mini green"><div class="km-val">+15</div><div class="km-label">Aperturas</div></div>
+          <div class="kpi-mini coral"><div class="km-val">-8</div><div class="km-label">Cierres</div></div>
+        </div>
+        <div class="screen-filter">
+          <div class="sf-label">Cadena</div>
+          <div class="sf-value">☑ Cruz Verde ☑ Ahumada ☐ Salcobrand</div>
+        </div>
+        <div class="screen-filter">
+          <div class="sf-label">Región</div>
+          <div class="sf-value">Metropolitana</div>
+        </div>
+        <div class="screen-filter">
+          <div class="sf-label">Comuna</div>
+          <div class="sf-value">Todas (52)</div>
+        </div>
+        <div class="screen-filter">
+          <div class="sf-label">NSE dominante</div>
+          <div class="sf-value">ABC1, C2</div>
+        </div>
+      </div>
+      <div class="screen-map"></div>
+    </div>
+  </div>
+</section>
+
+<!-- DATOS -->
+<section id="datos">
+  <div class="section-tag">Fuentes de datos</div>
+  <div class="section-title">Datos verificados, actualizados mensualmente</div>
+  <div class="section-desc">Combinamos fuentes públicas con los datos propios del cliente para una visión completa.</div>
+
+  <table class="data-table">
+    <tr><th>Fuente</th><th>Contenido</th><th>Frecuencia</th><th>Formato</th></tr>
+    <tr>
+      <td>MINSAL (Seremi en Línea)</td>
+      <td>Ubicación, nombre, cadena, dirección, comuna de cada farmacia registrada en Chile</td>
+      <td>Mensual (scraping automatizado)</td>
+      <td><code>CSV</code></td>
+    </tr>
+    <tr>
+      <td>INE / Censo</td>
+      <td>Población, hogares, NSE por manzana censal</td>
+      <td>Estática (actualizable)</td>
+      <td><code>Excel</code></td>
+    </tr>
+    <tr>
+      <td>Cliente (ventas)</td>
+      <td>Ventas por local, por cadena, por periodo</td>
+      <td>A demanda (upload local)</td>
+      <td><code>Excel</code></td>
+    </tr>
+    <tr>
+      <td>Cliente (zonas)</td>
+      <td>Polígonos de zonas comerciales propias</td>
+      <td>A demanda (upload local)</td>
+      <td><code>GeoJSON / SHP</code></td>
+    </tr>
+    <tr>
+      <td>Diff mensual</td>
+      <td>Aperturas y cierres detectados entre snapshots</td>
+      <td>Mensual (automatizado)</td>
+      <td><code>CSV</code></td>
+    </tr>
+  </table>
+</section>
+
+<!-- PROPUESTA -->
+<section id="propuesta">
+  <div class="section-tag">Propuesta</div>
+  <div class="section-title">Empezar es simple</div>
+  <div class="section-desc">Una implementación rápida que genera valor desde el día uno.</div>
+
+  <div class="pricing-card">
+    <h3>Piloto REALI</h3>
+    <div class="price">Implementación inicial · Región Metropolitana</div>
+    <div class="pricing-items">
+      <div class="pi">Dashboard interactivo con mapa, filtros y KPIs</div>
+      <div class="pi">Base de datos MINSAL completa (todas las farmacias de Chile)</div>
+      <div class="pi">Clasificación automática por cadena farmacéutica</div>
+      <div class="pi">Monitoreo mensual de aperturas y cierres</div>
+      <div class="pi">Integración de datos demográficos por manzana (INE/Censo)</div>
+      <div class="pi">Upload local de ventas propias y zonas geográficas</div>
+      <div class="pi">Ejecución 100% local — sin servidores, sin exposición de datos</div>
+      <div class="pi">Soporte técnico y actualizaciones mensuales de datos</div>
+    </div>
+    <a class="cta-btn" href="mailto:nichelson.churata@gmail.com?subject=REALI%20-%20Reunion%20de%20piloto">Agendar reunión →</a>
+  </div>
+</section>
+
+<footer>
+  REALI · Inteligencia Territorial · 2026<br>
+  <a href="mailto:nichelson.churata@gmail.com">nichelson.churata@gmail.com</a>
+</footer>
+
+</body>
+</html>
