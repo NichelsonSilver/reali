@@ -1,0 +1,24 @@
+id,nombre,cadena,comuna,region,lat,lon,tipo_movimiento,fecha_deteccion
+F00148,Farmacia Dr. Simi Maipú 148,Dr. Simi,Maipú,Metropolitana,-33.497048,-70.758074,apertura,2026-04-01
+F00054,Farmacia Salcobrand Lo Barnechea 54,Salcobrand,Lo Barnechea,Metropolitana,-33.321851,-70.506971,apertura,2026-04-01
+F00242,Farmacia Independiente Maipú 242,Independiente,Maipú,Metropolitana,-33.482843,-70.780763,apertura,2026-04-01
+F00014,Farmacia Cruz Verde Macul 14,Cruz Verde,Macul,Metropolitana,-33.513026,-70.595742,apertura,2026-04-01
+F00307,Farmacia Independiente Lo Barnechea 307,Independiente,Lo Barnechea,Metropolitana,-33.338509,-70.526179,apertura,2026-04-01
+F00169,Farmacia Ahumada Independencia 169,Ahumada,Independencia,Metropolitana,-33.449536,-70.647452,apertura,2026-04-01
+F00047,Farmacia Ahumada San Miguel 47,Ahumada,San Miguel,Metropolitana,-33.519877,-70.625566,apertura,2026-04-01
+F00028,Farmacia Salcobrand La Florida 28,Salcobrand,La Florida,Metropolitana,-33.533858,-70.618936,apertura,2026-04-01
+F00158,Farmacia Cruz Verde Recoleta 158,Cruz Verde,Recoleta,Metropolitana,-33.391645,-70.668164,apertura,2026-04-01
+F00438,Farmacia Ahumada Peñalolén 438,Ahumada,Peñalolén,Metropolitana,-33.516602,-70.553183,apertura,2026-04-01
+F00118,Farmacia Cruz Verde Macul 118,Cruz Verde,Macul,Metropolitana,-33.508214,-70.613842,apertura,2026-04-01
+F00404,Farmacia Independiente Las Condes 404,Independiente,Las Condes,Metropolitana,-33.394041,-70.553504,apertura,2026-04-01
+F00090,Farmacia Salcobrand San Miguel 90,Salcobrand,San Miguel,Metropolitana,-33.49886,-70.620493,apertura,2026-04-01
+F00377,Farmacia Knop Macul 377,Knop,Macul,Metropolitana,-33.503501,-70.626435,apertura,2026-04-01
+F00221,Farmacia Knop Recoleta 221,Knop,Recoleta,Metropolitana,-33.414256,-70.656476,apertura,2026-04-01
+F00014,Farmacia Cruz Verde Macul 14,Cruz Verde,Macul,Metropolitana,-33.513026,-70.595742,cierre,2026-04-01
+F00223,Farmacia Independiente Las Condes 223,Independiente,Las Condes,Metropolitana,-33.392863,-70.582058,cierre,2026-04-01
+F00289,Farmacia Ahumada Peñalolén 289,Ahumada,Peñalolén,Metropolitana,-33.513178,-70.543007,cierre,2026-04-01
+F00420,Farmacia Salcobrand Ñuñoa 420,Salcobrand,Ñuñoa,Metropolitana,-33.449702,-70.585063,cierre,2026-04-01
+F00214,Farmacia Knop Independencia 214,Knop,Independencia,Metropolitana,-33.443516,-70.652778,cierre,2026-04-01
+F00219,Farmacia Dr. Simi San Miguel 219,Dr. Simi,San Miguel,Metropolitana,-33.513064,-70.658411,cierre,2026-04-01
+F00398,Farmacia Independiente La Reina 398,Independiente,La Reina,Metropolitana,-33.450516,-70.557468,cierre,2026-04-01
+F00078,Farmacia Independiente Santiago 78,Independiente,Santiago,Metropolitana,-33.425459,-70.636484,cierre,2026-04-01

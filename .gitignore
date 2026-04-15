@@ -36,9 +36,8 @@ Thumbs.db
 # Datos pesados (censo, descargas)
 personas_censo2024/
 
-# Datos del producto (no exponer públicamente)
+# Datos estáticos (no servir como archivos descargables)
 public/data/
-src/data/*.csv
 
 # Scripts de scraping y procesamiento MINSAL
 SCRAPER/
