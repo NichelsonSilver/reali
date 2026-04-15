@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Papa from "papaparse";
+import demografiaRaw from "../data/demografia_censo.csv?raw";
 
 // Demografía agregada por comuna (generada por scripts/agregar_censo.py)
 export interface DemografiaCenso {
@@ -29,36 +30,33 @@ export function useDemografia(): UseDemografiaResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/data/demografia_censo.csv")
-      .then((res) => {
-        if (!res.ok) throw new Error(`No se pudo cargar demografia_censo.csv (${res.status})`);
-        return res.text();
-      })
-      .then((csv) => {
-        const result = Papa.parse<Record<string, string>>(csv, {
-          header: true,
-          skipEmptyLines: true,
-        });
+    try {
+      const result = Papa.parse<Record<string, string>>(demografiaRaw, {
+        header: true,
+        skipEmptyLines: true,
+      });
 
-        const parsed: DemografiaCenso[] = result.data.map((row) => ({
-          cod_comuna: row.cod_comuna?.trim() ?? "",
-          nombre_comuna: row.nombre_comuna?.trim() ?? "",
-          region: row.region?.trim() ?? "",
-          poblacion: parseInt(row.poblacion) || 0,
-          hombres: parseInt(row.hombres) || 0,
-          mujeres: parseInt(row.mujeres) || 0,
-          edad_0_14: parseInt(row.edad_0_14) || 0,
-          edad_15_29: parseInt(row.edad_15_29) || 0,
-          edad_30_44: parseInt(row.edad_30_44) || 0,
-          edad_45_59: parseInt(row.edad_45_59) || 0,
-          edad_60_mas: parseInt(row.edad_60_mas) || 0,
-          escolaridad_promedio: parseFloat(row.escolaridad_promedio) || 0,
-        }));
+      const parsed: DemografiaCenso[] = result.data.map((row) => ({
+        cod_comuna: row.cod_comuna?.trim() ?? "",
+        nombre_comuna: row.nombre_comuna?.trim() ?? "",
+        region: row.region?.trim() ?? "",
+        poblacion: parseInt(row.poblacion) || 0,
+        hombres: parseInt(row.hombres) || 0,
+        mujeres: parseInt(row.mujeres) || 0,
+        edad_0_14: parseInt(row.edad_0_14) || 0,
+        edad_15_29: parseInt(row.edad_15_29) || 0,
+        edad_30_44: parseInt(row.edad_30_44) || 0,
+        edad_45_59: parseInt(row.edad_45_59) || 0,
+        edad_60_mas: parseInt(row.edad_60_mas) || 0,
+        escolaridad_promedio: parseFloat(row.escolaridad_promedio) || 0,
+      }));
 
-        setDatos(parsed);
-      })
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
+      setDatos(parsed);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al parsear demografía");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   return { datos, loading, error };

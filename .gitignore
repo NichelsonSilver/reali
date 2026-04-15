@@ -35,7 +35,18 @@ Thumbs.db
 
 # Datos pesados (censo, descargas)
 personas_censo2024/
-SCRAPER/Auladigital_scraper/downloads/
+
+# Datos del producto (no exponer públicamente)
+public/data/
+src/data/*.csv
+
+# Scripts de scraping y procesamiento MINSAL
+SCRAPER/
+scripts/process_minsal.py
+scripts/procesar_minsal.py
+scripts/convert_minsal.js
+scripts/diff_aperturas.py
+scripts/agregar_censo.py
 
 # Claude Code local settings
 .claude/
