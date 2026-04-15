@@ -1,4 +1,10 @@
 import { useMemo, useState, Suspense, lazy } from "react";
+import {
+  SignedIn,
+  SignedOut,
+  SignIn,
+  UserButton,
+} from "@clerk/clerk-react";
 import { useFarmacias } from "./hooks/useFarmacias";
 import { useDemografia } from "./hooks/useDemografia";
 import PanelIzquierdo from "./components/PanelIzquierdo";
@@ -68,6 +74,33 @@ export default function App() {
   const totalFiltradas = farmaciasFiltradas.length;
 
   return (
+    <>
+      {/* Pantalla de login para usuarios no autenticados */}
+      <SignedOut>
+        <div className="h-screen flex items-center justify-center bg-gray-950">
+          <div className="text-center space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold text-white tracking-tight">
+                REALI
+              </h1>
+              <p className="text-sm text-gray-400 mt-1">
+                Inteligencia Territorial Farmacéutica
+              </p>
+            </div>
+            <SignIn
+              appearance={{
+                elements: {
+                  rootBox: "mx-auto",
+                  card: "bg-gray-900 border border-gray-800",
+                },
+              }}
+            />
+          </div>
+        </div>
+      </SignedOut>
+
+      {/* Dashboard completo para usuarios autenticados */}
+      <SignedIn>
     <div className="h-screen flex flex-col bg-gray-950 text-gray-100 overflow-hidden">
       {/* Header */}
       <header className="shrink-0 border-b border-gray-800 px-6 py-3 flex items-center justify-between">
@@ -109,6 +142,13 @@ export default function App() {
           {error && (
             <span className="text-xs text-red-400">Error: {error}</span>
           )}
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "w-7 h-7",
+              },
+            }}
+          />
         </div>
       </header>
 
@@ -169,5 +209,7 @@ export default function App() {
         </main>
       </div>
     </div>
+      </SignedIn>
+    </>
   );
 }

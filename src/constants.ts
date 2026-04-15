@@ -20,7 +20,7 @@ export const COLORES_CADENA: Record<CadenaFarmaceutica, string> = {
   "Maicao": "#AF28D1",
   "Knop": "#1C7521",
   "Redfarma": "#7605E5",
-  "Independiente": "#BF9600",
+  "Independiente": "#AB890F",
   "Otra": "#A6A4A4",
 };
 
