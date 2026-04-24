@@ -13,16 +13,7 @@ export interface ManzanaProps {
   hog: number;   // cantidad hogares
 }
 
-export interface ComunaProps {
-  cut: number;
-  comuna: string;
-  provincia: string;
-  pob: number;
-  n_manzanas: number;
-}
-
 export type Manzanas = FeatureCollection<Polygon | MultiPolygon, ManzanaProps>;
-export type Comunas = FeatureCollection<Polygon | MultiPolygon, ComunaProps>;
 
 // Cache en memoria por URL — una sola descarga por sesión aunque el toggle se active varias veces.
 const cache = new Map<string, Promise<unknown>>();
@@ -59,8 +50,4 @@ export function useLazyGeoJSON<T>(url: string, enabled: boolean) {
 
 export function useManzanasRM(enabled: boolean) {
   return useLazyGeoJSON<Manzanas>("/data/manzanas_rm.geojson", enabled);
-}
-
-export function useComunasRM(enabled: boolean) {
-  return useLazyGeoJSON<Comunas>("/data/comunas_rm.geojson", enabled);
 }

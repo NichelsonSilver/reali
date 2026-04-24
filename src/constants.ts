@@ -12,6 +12,17 @@ export const CADENAS: CadenaFarmaceutica[] = [
   "Otra",
 ];
 
+// Logos en public/logos/ (undefined → se renderiza círculo de color de fallback)
+export const LOGO_CADENA: Partial<Record<CadenaFarmaceutica, string>> = {
+  "Cruz Verde": "/logos/CruzVerde.png",
+  "Salcobrand": "/logos/Salcobrand.png",
+  "Ahumada":    "/logos/Ahumada.png",
+  "Dr. Simi":   "/logos/DrSimi.png",
+  "Maicao":     "/logos/Maicao.png",
+  "Knop":       "/logos/Knop.png",
+  "Redfarma":   "/logos/Redfarma.png",
+};
+
 export const COLORES_CADENA: Record<CadenaFarmaceutica, string> = {
   "Cruz Verde": "#00A651",
   "Salcobrand": "#0055A5",
@@ -61,6 +72,9 @@ export const NSE_COLORES: Record<string, string> = {
 
 export const MAP_CENTER: [number, number] = [-33.4489, -70.6693];
 export const MAP_ZOOM = 11;
+
+// Destinatario de reportes de pines mal ubicados. Ajustar según cliente.
+export const EMAIL_REPORTES = "reportes@reali.cl";
 
 export const MESES_CORTO = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
 

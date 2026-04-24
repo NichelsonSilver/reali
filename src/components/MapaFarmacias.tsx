@@ -1,12 +1,128 @@
-import { useState, useMemo } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup, GeoJSON } from "react-leaflet";
+import { useState, useMemo, useEffect } from "react";
+import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import type { Feature } from "geojson";
+import L from "leaflet";
 import { Farmacia } from "../types";
-import { COLORES_CADENA } from "../constants";
-import { useManzanasRM, useComunasRM, type ManzanaProps, type ComunaProps } from "../hooks/useGeoCapas";
+import { COLORES_CADENA, LOGO_CADENA, EMAIL_REPORTES } from "../constants";
+import { useManzanasRM, type ManzanaProps } from "../hooks/useGeoCapas";
 import {
   colorParaValor, CORTES, PALETA, ETIQUETA_VARIABLE, type VariableCoropleta,
 } from "../utils/coropleta";
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+}
+
+function mailtoReporte(f: Farmacia): string {
+  const asunto = `Pin mal ubicado — ${f.nombre}`;
+  const cuerpo =
+`Hola,
+
+El siguiente local parece tener coordenadas incorrectas:
+
+ID: ${f.id}
+Nombre: ${f.nombre}
+Cadena: ${f.cadena}
+Dirección declarada: ${f.direccion}
+Comuna: ${f.comuna}, ${f.region}
+Coordenadas actuales: ${f.lat}, ${f.lon}
+Google Maps: https://www.google.com/maps?q=${f.lat},${f.lon}
+
+Ubicación correcta / comentario:
+(describa el problema o pegue la lat,lon correcta)
+
+— Reportado desde REALI`;
+  return `mailto:${EMAIL_REPORTES}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+}
+
+function popupHTML(f: Farmacia, col: string): string {
+  const svUrl = `https://maps.google.com/maps?q=&layer=c&cbll=${f.lat},${f.lon}`;
+  const row = (lbl: string, val: string, color?: string) =>
+    `<span class="lbl">${lbl}</span><span class="val"${color ? ` style="color:${color}"` : ""}>${escapeHtml(val)}</span>`;
+  return `<div class="fpopup">
+    <h4>${escapeHtml(f.nombre)}</h4>
+    <div class="addr">${escapeHtml(f.direccion)}</div>
+    <div class="grid2">
+      ${row("Cadena", f.cadena, col)}
+      ${row("Comuna", f.comuna)}
+      ${row("Región", f.region)}
+      ${row("Tipo", f.tipo)}
+      ${f.horario ? row("Horario", f.horario) : ""}
+      ${f.telefono ? row("Teléfono", f.telefono) : ""}
+    </div>
+    <a href="${svUrl}" target="_blank" rel="noreferrer" class="sv">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="5" r="2"/><path d="M12 7v6"/><path d="M8 11l4 2 4-2"/><path d="M6 20c1.5-1.5 6-2 6-2s4.5.5 6 2"/>
+      </svg>
+      Ver en Street View
+    </a>
+    <a href="${mailtoReporte(f)}" class="rep" title="Abre tu cliente de correo con el reporte prearmado">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      Reportar ubicación incorrecta
+    </a>
+  </div>`;
+}
+
+function FarmaciasLayer({ farmacias, logosOn }: { farmacias: Farmacia[]; logosOn: boolean }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const group = L.layerGroup();
+
+    for (const f of farmacias) {
+      const col = COLORES_CADENA[f.cadena] ?? "#64748b";
+      let layer: L.Layer;
+
+      if (logosOn) {
+        const logo = LOGO_CADENA[f.cadena];
+        const html = logo
+          ? `<div class="farm-icon" style="border-color:${col}"><img src="${logo}" alt=""/></div>`
+          : `<div class="farm-icon" style="border-color:${col};background:${col}"><div class="farm-dot" style="background:${col};border-color:#fff"></div></div>`;
+        const icon = L.divIcon({
+          html, className: "", iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -13],
+        });
+        layer = L.marker([f.lat, f.lon], { icon });
+      } else {
+        layer = L.circleMarker([f.lat, f.lon], {
+          radius: 7, color: "rgba(255,255,255,0.8)", weight: 1.5,
+          fillColor: col, fillOpacity: 0.9,
+        });
+      }
+
+      layer.bindPopup(popupHTML(f, col), { maxWidth: 270, minWidth: 220 }).addTo(group);
+    }
+
+    group.addTo(map);
+    return () => { map.removeLayer(group); };
+  }, [map, farmacias, logosOn]);
+
+  return null;
+}
+
+interface ResultadoBusqueda { lat: number; lon: number; display: string; }
+
+function BuscadorEfecto({ resultado }: { resultado: ResultadoBusqueda | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!resultado) return;
+    const { lat, lon, display } = resultado;
+    map.flyTo([lat, lon], 16, { duration: 0.8 });
+    const marker = L.marker([lat, lon], {
+      icon: L.divIcon({
+        html: `<div class="search-pin"></div>`,
+        className: "", iconSize: [22, 22], iconAnchor: [11, 11],
+      }),
+    })
+      .bindPopup(`<div class="fpopup"><h4>Dirección</h4><div class="addr">${display.replace(/</g, "&lt;")}</div></div>`, { maxWidth: 260 })
+      .addTo(map)
+      .openPopup();
+    return () => { map.removeLayer(marker); };
+  }, [map, resultado]);
+  return null;
+}
 
 interface Props {
   farmacias: Farmacia[];
@@ -31,11 +147,39 @@ const C = {
 export default function MapaFarmacias({ farmacias }: Props) {
   const [tile, setTile] = useState<TileKey>("claro");
   const [manzanasOn, setManzanasOn] = useState(false);
-  const [comunasOn, setComunasOn] = useState(false);
+  const [logosOn, setLogosOn] = useState(true);
   const [variable, setVariable] = useState<VariableCoropleta>("pob");
+  const [busqueda, setBusqueda] = useState("");
+  const [buscando, setBuscando] = useState(false);
+  const [errorBusqueda, setErrorBusqueda] = useState<string | null>(null);
+  const [resultadoBusqueda, setResultadoBusqueda] = useState<ResultadoBusqueda | null>(null);
+
+  async function buscarDireccion() {
+    const q = busqueda.trim();
+    if (!q) return;
+    setBuscando(true); setErrorBusqueda(null);
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=cl&limit=1&q=${encodeURIComponent(q)}`;
+      const r = await fetch(url, { headers: { "Accept-Language": "es" } });
+      const data = (await r.json()) as Array<{ lat: string; lon: string; display_name: string }>;
+      if (!data.length) {
+        setErrorBusqueda("Sin resultados");
+        setResultadoBusqueda(null);
+      } else {
+        setResultadoBusqueda({
+          lat: parseFloat(data[0].lat),
+          lon: parseFloat(data[0].lon),
+          display: data[0].display_name,
+        });
+      }
+    } catch (e) {
+      setErrorBusqueda(e instanceof Error ? e.message : "Error");
+    } finally {
+      setBuscando(false);
+    }
+  }
 
   const { data: manzanas, loading: loadingManz } = useManzanasRM(manzanasOn);
-  const { data: comunas, loading: loadingCom } = useComunasRM(comunasOn);
 
   // Recalcular style sólo cuando cambia la variable (evita redibujar Leaflet si no hace falta).
   const estiloManzana = useMemo(
@@ -50,14 +194,6 @@ export default function MapaFarmacias({ farmacias }: Props) {
     },
     [variable],
   );
-
-  const estiloComuna = () => ({
-    fillColor: "transparent",
-    fillOpacity: 0,
-    color: "#0f172a",
-    weight: 1.3,
-    opacity: 0.8,
-  });
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -86,60 +222,54 @@ export default function MapaFarmacias({ farmacias }: Props) {
           />
         )}
 
-        {/* Borde de comunas */}
-        {comunasOn && comunas && (
-          <GeoJSON
-            key="com"
-            data={comunas}
-            style={estiloComuna}
-            onEachFeature={(feat, layer) => {
-              const p = feat.properties as ComunaProps;
-              layer.bindTooltip(
-                `<b>${p.comuna}</b><br/>${p.n_manzanas.toLocaleString("es-CL")} manzanas · ${p.pob.toLocaleString("es-CL")} hab.`,
-                { sticky: true, direction: "top" },
-              );
-            }}
-          />
-        )}
 
-        {farmacias.map((f) => {
-          const col = COLORES_CADENA[f.cadena] ?? "#64748b";
-          const svUrl = `https://maps.google.com/maps?q=&layer=c&cbll=${f.lat},${f.lon}`;
-          return (
-            <CircleMarker
-              key={f.id}
-              center={[f.lat, f.lon]}
-              radius={7}
-              pathOptions={{ color: "rgba(255,255,255,0.8)", weight: 1.5, fillColor: col, fillOpacity: 0.9 }}
-            >
-              <Popup maxWidth={270} minWidth={220}>
-                <div className="fpopup">
-                  <h4>{f.nombre}</h4>
-                  <div className="addr">{f.direccion}</div>
-                  <div className="grid2">
-                    <span className="lbl">Cadena</span>
-                    <span className="val" style={{ color: col }}>{f.cadena}</span>
-                    <span className="lbl">Comuna</span>
-                    <span className="val">{f.comuna}</span>
-                    <span className="lbl">Región</span>
-                    <span className="val">{f.region}</span>
-                    <span className="lbl">Tipo</span>
-                    <span className="val">{f.tipo}</span>
-                    {f.horario && (<><span className="lbl">Horario</span><span className="val">{f.horario}</span></>)}
-                    {f.telefono && (<><span className="lbl">Teléfono</span><span className="val">{f.telefono}</span></>)}
-                  </div>
-                  <a href={svUrl} target="_blank" rel="noreferrer" className="sv">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="5" r="2"/><path d="M12 7v6"/><path d="M8 11l4 2 4-2"/><path d="M6 20c1.5-1.5 6-2 6-2s4.5.5 6 2"/>
-                    </svg>
-                    Ver en Street View
-                  </a>
-                </div>
-              </Popup>
-            </CircleMarker>
-          );
-        })}
+        <FarmaciasLayer farmacias={farmacias} logosOn={logosOn} />
+        <BuscadorEfecto resultado={resultadoBusqueda} />
       </MapContainer>
+
+      {/* Buscador de dirección */}
+      <div style={{
+        position: "absolute", top: 10, right: 12, zIndex: 400,
+        background: "rgba(255,255,255,0.95)", border: `1px solid ${C.border}`,
+        borderRadius: 8, padding: "4px 6px 4px 10px", display: "flex", alignItems: "center", gap: 6,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.08)", backdropFilter: "blur(4px)",
+        width: 280,
+      }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+          <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="text"
+          placeholder="Buscar dirección en Chile…"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") buscarDireccion(); }}
+          style={{ flex: 1, border: "none", outline: "none", fontSize: 11.5, color: C.text2, background: "transparent" }}
+        />
+        {busqueda && (
+          <button
+            onClick={() => { setBusqueda(""); setErrorBusqueda(null); setResultadoBusqueda(null); }}
+            style={{ border: "none", background: "transparent", color: C.text3, cursor: "pointer", fontSize: 13, padding: 0, lineHeight: 1 }}
+            title="Limpiar"
+          >×</button>
+        )}
+        <button
+          onClick={buscarDireccion}
+          disabled={buscando || !busqueda.trim()}
+          style={{ padding: "4px 10px", borderRadius: 4, border: "none", background: C.accent, color: "#fff", fontSize: 10.5, fontWeight: 500, cursor: buscando ? "wait" : "pointer", opacity: buscando || !busqueda.trim() ? 0.5 : 1 }}
+        >
+          {buscando ? "…" : "Ir"}
+        </button>
+      </div>
+      {errorBusqueda && (
+        <div style={{
+          position: "absolute", top: 46, right: 12, zIndex: 400,
+          background: "#fef2f2", border: "1px solid #fecaca", color: "#991b1b",
+          borderRadius: 6, padding: "3px 10px", fontSize: 10.5,
+        }}>
+          {errorBusqueda}
+        </div>
+      )}
 
       {/* Tile picker */}
       <div style={{
@@ -177,12 +307,17 @@ export default function MapaFarmacias({ farmacias }: Props) {
         boxShadow: "0 2px 8px rgba(0,0,0,0.08)", backdropFilter: "blur(4px)",
       }}>
         <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: C.text3, marginBottom: 6 }}>
-          Capas Censo 2024
+          Capas
         </div>
 
         <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.text2, cursor: "pointer", marginBottom: 4 }}>
+          <input type="checkbox" checked={logosOn} onChange={(e) => setLogosOn(e.target.checked)} />
+          Logos de cadenas
+        </label>
+
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.text2, cursor: "pointer", marginBottom: 4 }}>
           <input type="checkbox" checked={manzanasOn} onChange={(e) => setManzanasOn(e.target.checked)} />
-          Manzanas {loadingManz && <span style={{ color: C.text3 }}>· cargando…</span>}
+          Manzanas censo 2024 {loadingManz && <span style={{ color: C.text3 }}>· cargando…</span>}
         </label>
 
         {manzanasOn && (
@@ -211,10 +346,6 @@ export default function MapaFarmacias({ farmacias }: Props) {
           </div>
         )}
 
-        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.text2, cursor: "pointer" }}>
-          <input type="checkbox" checked={comunasOn} onChange={(e) => setComunasOn(e.target.checked)} />
-          Bordes comunas {loadingCom && <span style={{ color: C.text3 }}>· cargando…</span>}
-        </label>
       </div>
 
       {/* Count badge */}
@@ -236,12 +367,22 @@ export default function MapaFarmacias({ farmacias }: Props) {
       }}>
         <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: C.text3, marginBottom: 6 }}>Cadenas</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          {LEGEND_CADENAS.map((c) => (
-            <div key={c} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 9, height: 9, borderRadius: "50%", background: COLORES_CADENA[c], flexShrink: 0, display: "inline-block" }} />
-              <span style={{ fontSize: 10, color: C.text2 }}>{c}</span>
-            </div>
-          ))}
+          {LEGEND_CADENAS.map((c) => {
+            const logo = LOGO_CADENA[c];
+            const col = COLORES_CADENA[c];
+            return (
+              <div key={c} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {logo ? (
+                  <span style={{ width: 16, height: 16, borderRadius: "50%", background: "#fff", border: `1.5px solid ${col}`, display: "inline-flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+                    <img src={logo} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 1 }} />
+                  </span>
+                ) : (
+                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: col, flexShrink: 0 }} />
+                )}
+                <span style={{ fontSize: 10, color: C.text2 }}>{c}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
