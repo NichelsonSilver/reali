@@ -1,5 +1,4 @@
 import { useMemo, useState, Suspense, lazy } from "react";
-import { SignedIn, SignedOut, SignIn, UserButton } from "@clerk/clerk-react";
 import { useFarmacias } from "./hooks/useFarmacias";
 import { useDemografia, DemografiaCenso } from "./hooks/useDemografia";
 import { Farmacia } from "./types";
@@ -7,6 +6,7 @@ import PanelIzquierdo from "./components/PanelIzquierdo";
 import UploadModal from "./components/UploadModal";
 import PageMovimientos from "./components/PageMovimientos";
 import PageCadenas from "./components/PageCadenas";
+import PasswordGate from "./components/PasswordGate";
 
 const MapaFarmacias = lazy(() => import("./components/MapaFarmacias"));
 
@@ -138,7 +138,6 @@ function Header({ page, count, total, onUpload }: { page: Page; count: number; t
             <IUp /> Subir archivo
           </button>
         )}
-        <UserButton appearance={{ elements: { avatarBox: "w-7 h-7" } }} />
       </div>
     </header>
   );
@@ -251,52 +250,50 @@ function PageMapa({
 // ── App ───────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const [ok, setOk] = useState(() => localStorage.getItem("demo") === "1");
   const { farmacias, loading, error } = useFarmacias();
   const { datos: demografia } = useDemografia();
   const [page, setPage] = useState<Page>("mapa");
   const [uploadModal, setUploadModal] = useState(false);
   const [count, setCount] = useState(0);
 
-  return (
-    <>
-      <SignedOut>
-        <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0f172a" }}>
-          <div style={{ textAlign: "center" }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#fff", letterSpacing: "-0.03em", marginBottom: 4 }}>REALI</h1>
-            <p style={{ fontSize: 13, color: "#475569", marginBottom: 24 }}>Inteligencia Territorial Farmacéutica</p>
-            <SignIn appearance={{ elements: { rootBox: "mx-auto", card: "bg-gray-900 border border-gray-800" } }} />
-          </div>
-        </div>
-      </SignedOut>
+  if (!ok) {
+    return (
+      <PasswordGate
+        onSuccess={() => {
+          localStorage.setItem("demo", "1");
+          setOk(true);
+        }}
+      />
+    );
+  }
 
-      <SignedIn>
-        <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: C.bg }}>
-          <NavSidebar page={page} setPage={setPage} />
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            <Header
-              page={page}
-              count={loading ? 0 : count}
-              total={farmacias.length}
-              onUpload={() => setUploadModal(true)}
+  return (
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: C.bg }}>
+      <NavSidebar page={page} setPage={setPage} />
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <Header
+          page={page}
+          count={loading ? 0 : count}
+          total={farmacias.length}
+          onUpload={() => setUploadModal(true)}
+        />
+        <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+          {page === "mapa" && (
+            <PageMapa
+              uploadModal={uploadModal}
+              setUploadModal={setUploadModal}
+              farmacias={farmacias}
+              demografia={demografia}
+              loading={loading}
+              error={error}
+              onCountChange={setCount}
             />
-            <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-              {page === "mapa" && (
-                <PageMapa
-                  uploadModal={uploadModal}
-                  setUploadModal={setUploadModal}
-                  farmacias={farmacias}
-                  demografia={demografia}
-                  loading={loading}
-                  error={error}
-                  onCountChange={setCount}
-                />
-              )}
-              {page === "movimientos" && <PageMovimientos />}
-              {page === "cadenas" && <PageCadenas />}
-            </div>
-          </div>
+          )}
+          {page === "movimientos" && <PageMovimientos />}
+          {page === "cadenas" && <PageCadenas />}
         </div>
-      </SignedIn>
-    </>
+      </div>
+    </div>
   );
 }
