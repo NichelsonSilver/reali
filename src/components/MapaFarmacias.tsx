@@ -1,7 +1,12 @@
-import { useState } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { useState, useMemo } from "react";
+import { MapContainer, TileLayer, CircleMarker, Popup, GeoJSON } from "react-leaflet";
+import type { Feature } from "geojson";
 import { Farmacia } from "../types";
 import { COLORES_CADENA } from "../constants";
+import { useManzanasRM, useComunasRM, type ManzanaProps, type ComunaProps } from "../hooks/useGeoCapas";
+import {
+  colorParaValor, CORTES, PALETA, ETIQUETA_VARIABLE, type VariableCoropleta,
+} from "../utils/coropleta";
 
 interface Props {
   farmacias: Farmacia[];
@@ -25,6 +30,34 @@ const C = {
 
 export default function MapaFarmacias({ farmacias }: Props) {
   const [tile, setTile] = useState<TileKey>("claro");
+  const [manzanasOn, setManzanasOn] = useState(false);
+  const [comunasOn, setComunasOn] = useState(false);
+  const [variable, setVariable] = useState<VariableCoropleta>("pob");
+
+  const { data: manzanas, loading: loadingManz } = useManzanasRM(manzanasOn);
+  const { data: comunas, loading: loadingCom } = useComunasRM(comunasOn);
+
+  // Recalcular style sólo cuando cambia la variable (evita redibujar Leaflet si no hace falta).
+  const estiloManzana = useMemo(
+    () => (feat?: Feature) => {
+      const props = (feat?.properties ?? {}) as ManzanaProps;
+      return {
+        fillColor: colorParaValor(props[variable] ?? 0, variable),
+        fillOpacity: 0.6,
+        color: "#ffffff",
+        weight: 0.2,
+      };
+    },
+    [variable],
+  );
+
+  const estiloComuna = () => ({
+    fillColor: "transparent",
+    fillOpacity: 0,
+    color: "#0f172a",
+    weight: 1.3,
+    opacity: 0.8,
+  });
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -36,6 +69,38 @@ export default function MapaFarmacias({ farmacias }: Props) {
         zoomControl={false}
       >
         <TileLayer key={tile} url={TILES[tile].url} attribution={TILES[tile].attr} maxZoom={19} />
+
+        {/* Coropleta manzanas (se descarga lazy al activar el toggle) */}
+        {manzanasOn && manzanas && (
+          <GeoJSON
+            key={`manz-${variable}`}
+            data={manzanas}
+            style={estiloManzana}
+            onEachFeature={(feat, layer) => {
+              const p = feat.properties as ManzanaProps;
+              layer.bindTooltip(
+                `<b>${p.comuna}</b><br/>Pob: ${p.pob.toLocaleString("es-CL")} · Viv: ${p.viv.toLocaleString("es-CL")} · Hog: ${p.hog.toLocaleString("es-CL")}`,
+                { sticky: true, direction: "top" },
+              );
+            }}
+          />
+        )}
+
+        {/* Borde de comunas */}
+        {comunasOn && comunas && (
+          <GeoJSON
+            key="com"
+            data={comunas}
+            style={estiloComuna}
+            onEachFeature={(feat, layer) => {
+              const p = feat.properties as ComunaProps;
+              layer.bindTooltip(
+                `<b>${p.comuna}</b><br/>${p.n_manzanas.toLocaleString("es-CL")} manzanas · ${p.pob.toLocaleString("es-CL")} hab.`,
+                { sticky: true, direction: "top" },
+              );
+            }}
+          />
+        )}
 
         {farmacias.map((f) => {
           const col = COLORES_CADENA[f.cadena] ?? "#64748b";
@@ -102,6 +167,54 @@ export default function MapaFarmacias({ farmacias }: Props) {
             {{ claro: "Claro", oscuro: "Oscuro", satelite: "Satélite", osm: "OSM" }[t]}
           </button>
         ))}
+      </div>
+
+      {/* Panel de capas */}
+      <div style={{
+        position: "absolute", top: 54, left: 12, zIndex: 400,
+        background: "rgba(255,255,255,0.95)", border: `1px solid ${C.border}`,
+        borderRadius: 8, padding: "8px 10px", minWidth: 190,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.08)", backdropFilter: "blur(4px)",
+      }}>
+        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: C.text3, marginBottom: 6 }}>
+          Capas Censo 2024
+        </div>
+
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.text2, cursor: "pointer", marginBottom: 4 }}>
+          <input type="checkbox" checked={manzanasOn} onChange={(e) => setManzanasOn(e.target.checked)} />
+          Manzanas {loadingManz && <span style={{ color: C.text3 }}>· cargando…</span>}
+        </label>
+
+        {manzanasOn && (
+          <div style={{ marginLeft: 18, marginBottom: 6 }}>
+            <select
+              value={variable}
+              onChange={(e) => setVariable(e.target.value as VariableCoropleta)}
+              style={{ fontSize: 11, padding: "2px 4px", border: `1px solid ${C.border}`, borderRadius: 4, background: "#fff", color: C.text2, width: "100%" }}
+            >
+              {(Object.keys(ETIQUETA_VARIABLE) as VariableCoropleta[]).map((k) => (
+                <option key={k} value={k}>{ETIQUETA_VARIABLE[k]}</option>
+              ))}
+            </select>
+
+            {/* Leyenda */}
+            <div style={{ marginTop: 6 }}>
+              <div style={{ display: "flex", height: 8, borderRadius: 3, overflow: "hidden" }}>
+                {PALETA.map((c) => <div key={c} style={{ flex: 1, background: c }} />)}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: C.text3, marginTop: 2 }}>
+                <span>0</span>
+                {CORTES[variable].map((v, i) => <span key={i}>{v}</span>)}
+                <span>+</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.text2, cursor: "pointer" }}>
+          <input type="checkbox" checked={comunasOn} onChange={(e) => setComunasOn(e.target.checked)} />
+          Bordes comunas {loadingCom && <span style={{ color: C.text3 }}>· cargando…</span>}
+        </label>
       </div>
 
       {/* Count badge */}

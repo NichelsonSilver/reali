@@ -35,9 +35,8 @@ Thumbs.db
 
 # Datos pesados (censo, descargas)
 personas_censo2024/
-
-# Datos estáticos (no servir como archivos descargables)
-public/data/
+microdatos_manzana/
+Cartografia_censo2024_Pais.gdb/
 
 # Scripts de scraping y procesamiento MINSAL
 SCRAPER/
