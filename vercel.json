@@ -1,8 +1,8 @@
 {
   "cleanUrls": false,
-  "rewrites": [
-    { "source": "/", "destination": "/web/index.html" },
-    { "source": "/dashboard", "destination": "/index.html" },
-    { "source": "/dashboard/", "destination": "/index.html" }
+  "routes": [
+    { "src": "/", "dest": "/web/index.html" },
+    { "src": "/dashboard/?", "dest": "/index.html" },
+    { "handle": "filesystem" }
   ]
 }
