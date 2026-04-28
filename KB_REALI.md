@@ -9,7 +9,7 @@
 **Nichelson Churata Núñez**
 - RUT: 24.218.473-4
 - Dirección: Pérez Valenzuela 1209
-- Contacto: +56 9 6787 1050 | nschurata@gmail.com
+- Contacto: +56 9 6787 1050 | nichelson@reali.cl
 - Ubicación operativa: Santiago, Chile (Providencia y alrededores)
 
 **Background relevante para ventas:**

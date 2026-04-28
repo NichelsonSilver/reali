@@ -49,5 +49,5 @@ scripts/agregar_censo.py
 # Claude Code local settings
 .claude/
 
-# Claude Design handoff bundle (raw export — implemented copy lives in public/site/)
+# Claude Design handoff bundle (raw export — implemented copy lives in public/web/)
 .design_handoff/

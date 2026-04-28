@@ -74,7 +74,7 @@ export const MAP_CENTER: [number, number] = [-33.4489, -70.6693];
 export const MAP_ZOOM = 11;
 
 // Destinatario de reportes de pines mal ubicados. Ajustar según cliente.
-export const EMAIL_REPORTES = "reportes@reali.cl";
+export const EMAIL_REPORTES = "nichelson@reali.cl";
 
 export const MESES_CORTO = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
 
