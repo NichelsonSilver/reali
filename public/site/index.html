@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REALI — Inteligencia de decisiones basada en datos</title>
+<meta name="description" content="Infraestructura de datos a medida para empresas enterprise. Analítica geoespacial, automatización con IA e infraestructura GCP con estándares de seguridad enterprise.">
+<link rel="icon" type="image/png" href="assets/logo-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@100..900&family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@100..900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root {
+  --midnight:#0B1A2E; --graphite:#1C2433; --graphite-2:#232E3F; --graphite-3:#2E3A4E;
+  --bone:#F4F1EA; --bone-dim:#BDB9B0; --bone-muted:#8A92A3;
+  --signal:#00E0D0; --signal-dim:#00B3A6; --signal-glow:rgba(0,224,208,0.15);
+  --amber:#F5A524; --amber-dim:#C98410;
+  --positive:#2D8A6B; --warning:#D4A017; --negative:#C13B3B;
+  --font-display:'Archivo Black',sans-serif;
+  --font-heading:'Montserrat',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius-sm:6px; --radius-md:10px; --radius-lg:16px; --radius-xl:24px;
+  --shadow-md:0 4px 16px rgba(0,0,0,0.45); --shadow-lg:0 8px 32px rgba(0,0,0,0.5);
+  --shadow-signal:0 0 24px rgba(0,224,208,0.2);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--midnight);color:var(--bone);font-size:16px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+ul{list-style:none}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,26,46,0.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,0.06);padding:0 48px}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1280px;margin:0 auto}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo img{height:28px;width:auto}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--bone-muted);letter-spacing:0.02em;transition:color 200ms ease}
+.nav-links a:hover{color:var(--bone)}
+.nav-cta{display:flex;align-items:center;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;transition:all 200ms ease;border:none;letter-spacing:0.01em}
+.btn-primary{background:var(--signal);color:var(--midnight)}
+.btn-primary:hover{background:var(--signal-dim);box-shadow:var(--shadow-signal)}
+.btn-ghost{background:transparent;color:var(--bone-muted);border:1px solid var(--graphite-3)}
+.btn-ghost:hover{color:var(--bone);border-color:var(--bone-muted)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:100px 48px 80px;position:relative;overflow:hidden}
+.hero-glow{position:absolute;top:-15%;right:-10%;width:700px;height:700px;background:radial-gradient(circle,rgba(0,224,208,0.07) 0%,transparent 65%);pointer-events:none}
+.hero-glow-2{position:absolute;bottom:-20%;left:-5%;width:500px;height:500px;background:radial-gradient(circle,rgba(245,165,36,0.04) 0%,transparent 65%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;max-width:1280px;margin:0 auto;width:100%}
+.hero-tag{font-family:var(--font-mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--signal);margin-bottom:20px}
+.hero h1{font-family:var(--font-display);font-size:clamp(44px,5.5vw,72px);line-height:1.05;letter-spacing:-0.02em;margin-bottom:24px}
+.hero h1 em{font-style:normal;color:var(--signal)}
+.hero-sub{font-size:18px;color:var(--bone-dim);line-height:1.7;max-width:500px;margin-bottom:40px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:0}
+.stat-card{background:var(--graphite);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:24px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--signal),transparent)}
+.stat-num{font-family:var(--font-display);font-size:36px;line-height:1;letter-spacing:-0.03em;color:var(--bone);margin-bottom:4px}
+.stat-label{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--bone-muted)}
+.stat-desc{font-size:13px;color:var(--bone-dim);margin-top:6px;line-height:1.4}
+
+/* SECTION BASE */
+.section{padding:100px 48px}
+.section-inner{max-width:1280px;margin:0 auto}
+.section-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--signal);margin-bottom:12px}
+.section-title{font-family:var(--font-display);font-size:clamp(32px,4vw,48px);line-height:1.1;letter-spacing:-0.02em;margin-bottom:16px}
+.section-lead{font-size:18px;color:var(--bone-dim);max-width:580px;line-height:1.7}
+
+/* SERVICIOS */
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+.service-card{background:var(--graphite);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:32px;position:relative;overflow:hidden;transition:border-color 250ms ease,transform 250ms ease}
+.service-card:hover{border-color:rgba(0,224,208,0.25);transform:translateY(-3px)}
+.service-card.featured{border-color:rgba(0,224,208,0.15);background:linear-gradient(145deg,var(--graphite-2),var(--graphite))}
+.service-icon{width:44px;height:44px;border-radius:var(--radius-md);background:rgba(0,224,208,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--signal)}
+.service-icon.amber{background:rgba(245,165,36,0.1);color:var(--amber)}
+.service-num{font-family:var(--font-mono);font-size:11px;color:var(--bone-muted);letter-spacing:0.1em;margin-bottom:10px}
+.service-card h3{font-family:var(--font-heading);font-size:18px;font-weight:700;margin-bottom:10px}
+.service-card p{font-size:14px;color:var(--bone-muted);line-height:1.6}
+.service-tag{display:inline-flex;align-items:center;margin-top:16px;font-family:var(--font-mono);font-size:11px;padding:4px 10px;border-radius:var(--radius-sm);background:rgba(0,224,208,0.08);color:var(--signal);border:1px solid rgba(0,224,208,0.15);letter-spacing:0.08em}
+.service-tag.amber{background:rgba(245,165,36,0.08);color:var(--amber);border-color:rgba(245,165,36,0.15)}
+
+/* PROCESO */
+.process-bg{background:var(--graphite)}
+.process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;position:relative}
+.process-steps::before{content:'';position:absolute;top:28px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--graphite-3) 20%,var(--signal) 50%,var(--graphite-3) 80%,transparent);pointer-events:none}
+.process-step{text-align:center;padding:0 20px;position:relative}
+.step-dot{width:56px;height:56px;border-radius:50%;border:2px solid var(--graphite-3);background:var(--graphite);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--signal);position:relative;z-index:1;transition:border-color 300ms ease}
+.step-dot.active{border-color:var(--signal);background:rgba(0,224,208,0.08);box-shadow:var(--shadow-signal)}
+.process-step h4{font-family:var(--font-heading);font-size:15px;font-weight:700;margin-bottom:8px}
+.process-step p{font-size:13px;color:var(--bone-muted);line-height:1.5}
+
+/* CASOS DE USO */
+.cases-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:56px}
+.case-card{background:var(--graphite);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:36px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start;transition:border-color 250ms ease}
+.case-card:hover{border-color:rgba(0,224,208,0.2)}
+.case-industry{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--signal);margin-bottom:10px}
+.case-card h3{font-family:var(--font-heading);font-size:20px;font-weight:700;margin-bottom:10px}
+.case-card p{font-size:14px;color:var(--bone-muted);line-height:1.6}
+.case-metrics{display:flex;flex-direction:column;gap:12px;min-width:100px}
+.case-metric{text-align:right}
+.case-metric .m-val{font-family:var(--font-display);font-size:24px;color:var(--signal);line-height:1}
+.case-metric .m-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--bone-muted);margin-top:2px}
+
+/* SEGURIDAD */
+.security-bg{background:var(--midnight)}
+.security-header{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-bottom:64px;padding-bottom:64px;border-bottom:1px solid var(--graphite-3)}
+.gcp-badge{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:var(--radius-md);border:1px solid rgba(0,224,208,0.2);background:rgba(0,224,208,0.05);margin-bottom:24px}
+.gcp-badge span{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--signal)}
+.security-visual{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sec-metric{background:var(--graphite);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-md);padding:20px;text-align:center}
+.sec-metric .m-val{font-family:var(--font-display);font-size:28px;color:var(--signal);display:block}
+.sec-metric .m-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--bone-muted);margin-top:4px;display:block}
+.security-pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px}
+.pillar{background:var(--graphite);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:28px;transition:border-color 250ms ease}
+.pillar:hover{border-color:rgba(0,224,208,0.2)}
+.pillar-icon{width:40px;height:40px;border-radius:var(--radius-md);background:rgba(0,224,208,0.08);display:flex;align-items:center;justify-content:center;color:var(--signal);margin-bottom:16px}
+.pillar h4{font-family:var(--font-heading);font-size:15px;font-weight:700;margin-bottom:8px}
+.pillar p{font-size:13px;color:var(--bone-muted);line-height:1.6}
+.pillar-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.pillar-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.04);border:1px solid var(--graphite-3);color:var(--bone-muted)}
+.compliance-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.compliance-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:var(--radius-sm);background:var(--graphite);border:1px solid var(--graphite-3)}
+.compliance-badge .cb-dot{width:8px;height:8px;border-radius:50%;background:var(--positive);flex-shrink:0}
+.compliance-badge span{font-family:var(--font-mono);font-size:12px;color:var(--bone-dim)}
+.security-arch{background:var(--graphite);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-xl);padding:40px;margin-top:48px}
+.arch-title{font-family:var(--font-heading);font-size:16px;font-weight:700;margin-bottom:24px;color:var(--bone-dim)}
+.arch-layers{display:flex;flex-direction:column;gap:2px}
+.arch-layer{display:grid;grid-template-columns:160px 1fr;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.arch-layer:last-child{border-bottom:none}
+.layer-label{font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--bone-muted)}
+.layer-content{display:flex;gap:8px;flex-wrap:wrap}
+.layer-item{font-size:13px;color:var(--bone-dim);background:rgba(255,255,255,0.04);border:1px solid var(--graphite-3);border-radius:var(--radius-sm);padding:4px 10px}
+.layer-item.accent{background:rgba(0,224,208,0.08);border-color:rgba(0,224,208,0.2);color:var(--signal)}
+
+/* SOBRE NOSOTROS */
+.about-bg{background:var(--graphite)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.founder-card{background:var(--midnight);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-xl);padding:36px}
+.founder-header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.founder-avatar{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--signal-glow),rgba(0,224,208,0.3));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;color:var(--signal);border:2px solid rgba(0,224,208,0.2)}
+.founder-name{font-family:var(--font-heading);font-size:18px;font-weight:700}
+.founder-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--bone-muted);margin-top:2px}
+.founder-bio{font-size:14px;color:var(--bone-dim);line-height:1.7;margin-bottom:20px}
+.exp-list{display:flex;flex-direction:column;gap:10px}
+.exp-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--bone-dim)}
+.exp-dot{width:6px;height:6px;border-radius:50%;background:var(--signal);flex-shrink:0;margin-top:6px}
+.about-points{display:flex;flex-direction:column;gap:24px}
+.about-point h4{font-family:var(--font-heading);font-size:16px;font-weight:700;margin-bottom:6px}
+.about-point p{font-size:14px;color:var(--bone-muted);line-height:1.6}
+.about-divider{width:32px;height:2px;background:var(--signal);margin-bottom:20px}
+
+/* TECH STACK */
+.stack-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+.stack-item{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.03);border:1px solid var(--graphite-3);font-size:13px;color:var(--bone-dim)}
+.stack-item i{color:var(--signal)}
+
+/* CONTACTO */
+.contact-bg{background:var(--midnight);position:relative;overflow:hidden}
+.contact-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:400px;background:radial-gradient(ellipse,rgba(0,224,208,0.06) 0%,transparent 65%);pointer-events:none}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.contact-card{background:var(--graphite);border:1px solid rgba(0,224,208,0.15);border-radius:var(--radius-xl);padding:40px;box-shadow:var(--shadow-signal)}
+.contact-options{display:flex;flex-direction:column;gap:12px;margin-top:32px}
+.contact-option{display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);transition:all 250ms ease;cursor:pointer}
+.contact-option:hover{border-color:rgba(0,224,208,0.2);background:rgba(0,224,208,0.04);transform:translateX(4px)}
+.co-icon{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.co-icon.teal{background:rgba(0,224,208,0.1);color:var(--signal)}
+.co-icon.amber{background:rgba(245,165,36,0.1);color:var(--amber)}
+.co-label{font-weight:600;font-size:14px}
+.co-sub{font-size:12px;color:var(--bone-muted);margin-top:2px}
+.contact-form{display:flex;flex-direction:column;gap:14px;margin-top:28px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--bone-muted)}
+.field input,.field select,.field textarea{background:rgba(255,255,255,0.04);border:1px solid var(--graphite-3);border-radius:var(--radius-sm);padding:10px 14px;font-family:var(--font-body);font-size:14px;color:var(--bone);outline:none;transition:border-color 200ms ease;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--signal)}
+.field select option{background:var(--graphite)}
+.field textarea{min-height:80px}
+.btn-full{width:100%;justify-content:center;padding:14px}
+
+/* FOOTER */
+footer{background:var(--graphite);border-top:1px solid rgba(255,255,255,0.06);padding:40px 48px}
+.footer-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.footer-logo img{height:24px}
+.footer-meta{font-family:var(--font-mono);font-size:11px;color:var(--bone-muted);text-align:right;line-height:1.8}
+
+/* SCROLL ANIM */
+.fade-up{opacity:0;transform:translateY(28px);transition:opacity 600ms ease,transform 600ms ease}
+.fade-up.visible{opacity:1;transform:none}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:0 24px}
+  .nav-links{display:none}
+  .hero{padding:100px 24px 60px}
+  .hero-grid{grid-template-columns:1fr}
+  .hero-stats{grid-template-columns:1fr 1fr}
+  .section{padding:72px 24px}
+  .services-grid{grid-template-columns:1fr}
+  .process-steps{grid-template-columns:1fr 1fr;gap:24px}
+  .process-steps::before{display:none}
+  .cases-grid{grid-template-columns:1fr}
+  .security-header{grid-template-columns:1fr}
+  .security-pillars{grid-template-columns:1fr}
+  .about-grid{grid-template-columns:1fr}
+  .contact-grid{grid-template-columns:1fr}
+  .footer-inner{flex-direction:column;gap:16px;text-align:center}
+  .footer-meta{text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#inicio">
+      <img src="assets/wordmark-bone-light.png" alt="REALI">
+    </a>
+    <div class="nav-links">
+      <a href="#servicios">Servicios</a>
+      <a href="#casos">Casos de uso</a>
+      <a href="#seguridad">Seguridad</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#contacto">Contacto</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="/" target="_blank" rel="noopener" title="Abrir dashboard SIG">
+        <i data-lucide="map" style="width:15px;height:15px"></i>
+        App SIG
+      </a>
+      <a class="btn btn-primary" href="#contacto">
+        <i data-lucide="calendar" style="width:15px;height:15px"></i>
+        Agendar diagnóstico
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-glow"></div>
+  <div class="hero-glow-2"></div>
+  <div class="hero-grid">
+    <div>
+      <div class="hero-tag">Inteligencia de decisiones basada en datos</div>
+      <h1>Infraestructura de datos<br>a medida para <em>empresas que deciden con precisión</em></h1>
+      <p class="hero-sub">Combinamos analítica geoespacial, automatización con IA e infraestructura en GCP para convertir datos complejos en ventajas competitivas reales.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/" target="_blank" rel="noopener">
+          <i data-lucide="map" style="width:15px;height:15px"></i>
+          Abrir dashboard SIG
+        </a>
+        <a class="btn btn-ghost" href="#seguridad">
+          <i data-lucide="shield-check" style="width:15px;height:15px"></i>
+          Estándares de seguridad
+        </a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-card fade-up">
+        <div class="stat-num">5.915</div>
+        <div class="stat-label">PUNTOS DE DATOS</div>
+        <div class="stat-desc">Farmacias activas en Chile — precisión &lt;30 m</div>
+      </div>
+      <div class="stat-card fade-up">
+        <div class="stat-num">99.9%</div>
+        <div class="stat-label">UPTIME SLA</div>
+        <div class="stat-desc">Infraestructura GCP con redundancia multi-región</div>
+      </div>
+      <div class="stat-card fade-up">
+        <div class="stat-num">12+</div>
+        <div class="stat-label">INDUSTRIAS</div>
+        <div class="stat-desc">Retail, farmacias, banca, supermercados, salud</div>
+      </div>
+      <div class="stat-card fade-up">
+        <div class="stat-num">AES-256</div>
+        <div class="stat-label">CIFRADO</div>
+        <div class="stat-desc">Estándar enterprise en tránsito y en reposo</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICIOS -->
+<section class="section" id="servicios">
+  <div class="section-inner">
+    <div class="section-eyebrow">Líneas de servicio</div>
+    <h2 class="section-title">Soluciones construidas<br>para decisiones de alto impacto</h2>
+    <p class="section-lead">No vendemos dashboards genéricos. Construimos infraestructura de datos a medida, calibrada para las complejidades operativas de cada cliente.</p>
+    <div class="services-grid fade-up">
+
+      <div class="service-card featured">
+        <div class="service-icon"><i data-lucide="database" style="width:20px;height:20px"></i></div>
+        <div class="service-num">01 — DATOS DE MERCADO</div>
+        <h3>Inteligencia de puntos de interés</h3>
+        <p>Bases de datos georreferenciadas de farmacias, retail, supermercados y más — con cobertura nacional y actualización mensual. Coordenadas con precisión &lt;30 metros.</p>
+        <span class="service-tag">Actualización mensual</span>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="map" style="width:20px;height:20px"></i></div>
+        <div class="service-num">02 — EXPANSIÓN COMERCIAL</div>
+        <h3>Análisis geoespacial de expansión</h3>
+        <p>Zonificación de mercado, scoring de ubicaciones, análisis de competencia y demanda poblacional. Cada apertura de local respaldada por datos, no por intuición.</p>
+        <span class="service-tag">Por proyecto</span>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon amber"><i data-lucide="bot" style="width:20px;height:20px"></i></div>
+        <div class="service-num">03 — AUTOMATIZACIÓN CON IA</div>
+        <h3>Agentes y flujos inteligentes</h3>
+        <p>Pipelines automáticos de recolección, limpieza y enriquecimiento de datos. Agentes IA para monitoreo de competencia, scraping y procesamiento documental.</p>
+        <span class="service-tag amber">IA Aplicada</span>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="layout-dashboard" style="width:20px;height:20px"></i></div>
+        <div class="service-num">04 — BACKOFFICE TECNOLÓGICO</div>
+        <h3>Dashboards y reportería avanzada</h3>
+        <p>Visualizaciones interactivas en Looker Studio y BigQuery. Métricas operativas en tiempo real, integradas con los sistemas existentes del cliente.</p>
+        <span class="service-tag">Retainer mensual</span>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="server" style="width:20px;height:20px"></i></div>
+        <div class="service-num">05 — INFRAESTRUCTURA GCP</div>
+        <h3>Arquitectura de datos cloud-native</h3>
+        <p>Diseño e implementación de infraestructura GCP: pipelines ETL/ELT, almacenamiento seguro, APIs de datos y orquestación de flujos — adaptada a cada empresa.</p>
+        <span class="service-tag">Infraestructura</span>
+      </div>
+
+      <div class="service-card" style="background:linear-gradient(145deg,rgba(0,224,208,0.05),var(--graphite));border-color:rgba(0,224,208,0.12)">
+        <div class="service-icon"><i data-lucide="trending-up" style="width:20px;height:20px"></i></div>
+        <div class="service-num">06 — MODELOS PREDICTIVOS</div>
+        <h3>Forecasting y scoring ML</h3>
+        <p>Modelos de proyección de demanda, clasificación de riesgo y scoring de oportunidades comerciales. Machine learning aplicado a los datos reales del negocio.</p>
+        <span class="service-tag">ML Aplicado</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROCESO -->
+<section class="section process-bg">
+  <div class="section-inner">
+    <div class="section-eyebrow">Metodología</div>
+    <h2 class="section-title">Cómo trabajamos</h2>
+    <p class="section-lead">Cada proyecto comienza con un diagnóstico real del negocio, no con una propuesta estándar.</p>
+    <div class="process-steps fade-up">
+      <div class="process-step">
+        <div class="step-dot active">01</div>
+        <h4>Diagnóstico</h4>
+        <p>Entendemos el problema de fondo: qué decisiones se traban, qué datos existen y qué falta.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-dot">02</div>
+        <h4>Arquitectura</h4>
+        <p>Diseñamos la infraestructura mínima necesaria para resolver el problema — sin sobreingeniería.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-dot">03</div>
+        <h4>Implementación</h4>
+        <p>Construimos, probamos e integramos en GCP con los estándares de seguridad del cliente.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-dot">04</div>
+        <h4>Operación continua</h4>
+        <p>Entregamos y operamos: pipelines activos, alertas automáticas y soporte de mejora continua.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASOS DE USO -->
+<section class="section" id="casos">
+  <div class="section-inner">
+    <div class="section-eyebrow">Aplicaciones</div>
+    <h2 class="section-title">Casos de uso reales</h2>
+    <p class="section-lead">Soluciones que resuelven problemas concretos de expansión, operaciones y vigilancia de mercado en industrias de alto movimiento.</p>
+    <div class="cases-grid fade-up">
+
+      <div class="case-card">
+        <div>
+          <div class="case-industry">Farmacias / Salud</div>
+          <h3>Mapa de competencia farmacéutica</h3>
+          <p>Base nacional de 5.915 farmacias georreferenciadas con actualización mensual. Permite identificar zonas de alta densidad competitiva, brechas de cobertura y oportunidades de apertura con datos demográficos integrados.</p>
+        </div>
+        <div class="case-metrics">
+          <div class="case-metric"><div class="m-val">5.9K</div><div class="m-lbl">Registros</div></div>
+          <div class="case-metric"><div class="m-val">&lt;30m</div><div class="m-lbl">Precisión GPS</div></div>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div>
+          <div class="case-industry">Retail / Expansión</div>
+          <h3>Scoring de nuevas ubicaciones</h3>
+          <p>Modelo que combina datos demográficos del Censo 2024, flujos de movilidad, competencia directa y datos socioeconómicos para puntuar cada manzana como candidata a apertura de local.</p>
+        </div>
+        <div class="case-metrics">
+          <div class="case-metric"><div class="m-val">360°</div><div class="m-lbl">Cobertura</div></div>
+          <div class="case-metric"><div class="m-val">ML</div><div class="m-lbl">Scoring</div></div>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div>
+          <div class="case-industry">E-commerce / Operaciones</div>
+          <h3>Automatización de reportería comercial</h3>
+          <p>Pipeline automático que extrae datos de ventas, calcula KPIs por SKU, detecta anomalías y genera reportes mensuales sin intervención humana. Integrado con ERP y canales de comunicación del equipo.</p>
+        </div>
+        <div class="case-metrics">
+          <div class="case-metric"><div class="m-val">0h</div><div class="m-lbl">Manual</div></div>
+          <div class="case-metric"><div class="m-val">Auto</div><div class="m-lbl">Reporting</div></div>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div>
+          <div class="case-industry">Inteligencia de mercado</div>
+          <h3>Vigilancia de precios y aperturas</h3>
+          <p>Scrapers especializados que monitorean aperturas, cierres y cambios de precios en cadenas competidoras en tiempo real. Alertas automáticas cuando el mercado se mueve.</p>
+        </div>
+        <div class="case-metrics">
+          <div class="case-metric"><div class="m-val">24/7</div><div class="m-lbl">Monitoreo</div></div>
+          <div class="case-metric"><div class="m-val">Real-time</div><div class="m-lbl">Alertas</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SEGURIDAD -->
+<section class="section security-bg" id="seguridad">
+  <div class="section-inner">
+    <div class="security-header fade-up">
+      <div>
+        <div class="gcp-badge">
+          <i data-lucide="cloud" style="width:16px;height:16px;color:var(--signal)"></i>
+          <span>Infraestructura certificada en Google Cloud Platform</span>
+        </div>
+        <div class="section-eyebrow">Seguridad & Privacidad de datos</div>
+        <h2 class="section-title">Estándares enterprise,<br>sin excepciones</h2>
+        <p style="font-size:16px;color:var(--bone-muted);line-height:1.7;max-width:520px">Los datos del cliente son el activo más valioso que administramos. Toda la arquitectura de REALI está diseñada desde cero con seguridad como requisito no negociable — no como añadido posterior.</p>
+      </div>
+      <div class="security-visual">
+        <div class="sec-metric"><span class="m-val">AES-256</span><span class="m-lbl">Cifrado en reposo</span></div>
+        <div class="sec-metric"><span class="m-val">TLS 1.3</span><span class="m-lbl">Cifrado en tránsito</span></div>
+        <div class="sec-metric"><span class="m-val">Zero Trust</span><span class="m-lbl">Modelo de acceso</span></div>
+        <div class="sec-metric"><span class="m-val">99.99%</span><span class="m-lbl">Disponibilidad GCP</span></div>
+      </div>
+    </div>
+
+    <div class="security-pillars fade-up">
+
+      <div class="pillar">
+        <div class="pillar-icon"><i data-lucide="lock" style="width:20px;height:20px"></i></div>
+        <h4>Cifrado total de datos</h4>
+        <p>Todos los datos en reposo son cifrados con AES-256. Las comunicaciones utilizan TLS 1.3 exclusivamente. Las claves de cifrado son gestionadas mediante Cloud KMS de GCP, con rotación automática programada.</p>
+        <div class="pillar-tags">
+          <span class="pillar-tag">AES-256</span>
+          <span class="pillar-tag">TLS 1.3</span>
+          <span class="pillar-tag">Cloud KMS</span>
+        </div>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-icon"><i data-lucide="user-check" style="width:20px;height:20px"></i></div>
+        <h4>Gestión de identidad y acceso</h4>
+        <p>Modelo Zero Trust aplicado a cada recurso. IAM de GCP con principio de mínimo privilegio. Autenticación multifactor obligatoria. Accesos auditados y revocados automáticamente cuando ya no son necesarios.</p>
+        <div class="pillar-tags">
+          <span class="pillar-tag">Zero Trust</span>
+          <span class="pillar-tag">IAM</span>
+          <span class="pillar-tag">MFA</span>
+          <span class="pillar-tag">RBAC</span>
+        </div>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-icon"><i data-lucide="network" style="width:20px;height:20px"></i></div>
+        <h4>Aislamiento de red privada</h4>
+        <p>Cada cliente opera en una VPC privada dedicada en GCP, completamente aislada de otros entornos. Firewall rules granulares, Private Google Access y Cloud NAT para tráfico saliente controlado.</p>
+        <div class="pillar-tags">
+          <span class="pillar-tag">VPC Privada</span>
+          <span class="pillar-tag">Firewall GCP</span>
+          <span class="pillar-tag">Private Access</span>
+        </div>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-icon"><i data-lucide="file-text" style="width:20px;height:20px"></i></div>
+        <h4>Auditoría y trazabilidad</h4>
+        <p>Cloud Audit Logs captura cada acción sobre los datos: quién accedió, desde dónde, cuándo y qué operación realizó. Los logs son inmutables y se retienen por 90 días por defecto, ampliables contractualmente.</p>
+        <div class="pillar-tags">
+          <span class="pillar-tag">Cloud Audit Logs</span>
+          <span class="pillar-tag">SIEM</span>
+          <span class="pillar-tag">Inmutable</span>
+        </div>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-icon"><i data-lucide="map-pin" style="width:20px;height:20px"></i></div>
+        <h4>Residencia de datos</h4>
+        <p>Los datos se almacenan en la región de GCP que el cliente defina — por defecto us-central1 con opción southamerica-east1 (São Paulo) para cumplimiento de residencia en LATAM. Sin movimiento de datos no autorizado.</p>
+        <div class="pillar-tags">
+          <span class="pillar-tag">Data Residency</span>
+          <span class="pillar-tag">LATAM Region</span>
+          <span class="pillar-tag">BigQuery</span>
+        </div>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-icon"><i data-lucide="shield" style="width:20px;height:20px"></i></div>
+        <h4>Prevención de fuga de datos (DLP)</h4>
+        <p>Cloud DLP de GCP inspecciona y clasifica información sensible automáticamente. Políticas de retención y eliminación de datos configurables. Acceso de producción nunca expone datos en texto claro a desarrolladores.</p>
+        <div class="pillar-tags">
+          <span class="pillar-tag">Cloud DLP</span>
+          <span class="pillar-tag">Clasificación</span>
+          <span class="pillar-tag">Data masking</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="fade-up">
+      <div class="section-eyebrow" style="margin-top:48px">Marco regulatorio</div>
+      <p style="font-size:15px;color:var(--bone-muted);margin-bottom:20px">Google Cloud Platform, la plataforma subyacente de REALI, opera bajo los siguientes marcos de cumplimiento. Los contratos incluyen cláusulas de cumplimiento específicas para cada cliente.</p>
+      <div class="compliance-row">
+        <div class="compliance-badge"><div class="cb-dot"></div><span>ISO/IEC 27001</span></div>
+        <div class="compliance-badge"><div class="cb-dot"></div><span>SOC 2 Type II</span></div>
+        <div class="compliance-badge"><div class="cb-dot"></div><span>GDPR</span></div>
+        <div class="compliance-badge"><div class="cb-dot"></div><span>Ley 19.628 (Chile)</span></div>
+        <div class="compliance-badge"><div class="cb-dot"></div><span>PCI DSS</span></div>
+        <div class="compliance-badge"><div class="cb-dot"></div><span>HIPAA eligible</span></div>
+        <div class="compliance-badge"><div class="cb-dot"></div><span>FedRAMP High</span></div>
+      </div>
+    </div>
+
+    <div class="security-arch fade-up">
+      <div class="arch-title">Arquitectura de seguridad — capas de protección</div>
+      <div class="arch-layers">
+        <div class="arch-layer">
+          <div class="layer-label">Acceso</div>
+          <div class="layer-content">
+            <span class="layer-item accent">Zero Trust IAM</span>
+            <span class="layer-item">MFA obligatorio</span>
+            <span class="layer-item">RBAC granular</span>
+            <span class="layer-item">Service accounts dedicadas</span>
+          </div>
+        </div>
+        <div class="arch-layer">
+          <div class="layer-label">Red</div>
+          <div class="layer-content">
+            <span class="layer-item accent">VPC privada por cliente</span>
+            <span class="layer-item">Firewall rules</span>
+            <span class="layer-item">Cloud Armor (WAF)</span>
+            <span class="layer-item">Private Service Connect</span>
+          </div>
+        </div>
+        <div class="arch-layer">
+          <div class="layer-label">Datos en tránsito</div>
+          <div class="layer-content">
+            <span class="layer-item accent">TLS 1.3</span>
+            <span class="layer-item">HTTPS obligatorio</span>
+            <span class="layer-item">Certificate pinning</span>
+          </div>
+        </div>
+        <div class="arch-layer">
+          <div class="layer-label">Datos en reposo</div>
+          <div class="layer-content">
+            <span class="layer-item accent">AES-256 (Google default)</span>
+            <span class="layer-item">CMEK opcional</span>
+            <span class="layer-item">Cloud KMS</span>
+            <span class="layer-item">Bucket-level policies</span>
+          </div>
+        </div>
+        <div class="arch-layer">
+          <div class="layer-label">Observabilidad</div>
+          <div class="layer-content">
+            <span class="layer-item accent">Cloud Audit Logs</span>
+            <span class="layer-item">Security Command Center</span>
+            <span class="layer-item">Alertas en tiempo real</span>
+            <span class="layer-item">Cloud Monitoring</span>
+          </div>
+        </div>
+        <div class="arch-layer">
+          <div class="layer-label">Continuidad</div>
+          <div class="layer-content">
+            <span class="layer-item accent">DR multi-región</span>
+            <span class="layer-item">Backups automatizados</span>
+            <span class="layer-item">RTO &lt; 4h</span>
+            <span class="layer-item">SLA 99.9% uptime</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOBRE NOSOTROS -->
+<section class="section about-bg" id="nosotros">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div>
+        <div class="section-eyebrow">Quiénes somos</div>
+        <h2 class="section-title">Experiencia de primera línea en la industria que servimos</h2>
+        <p style="font-size:16px;color:var(--bone-muted);line-height:1.7;margin-bottom:32px">REALI no es una agencia de tecnología genérica. Es una firma fundada por un analista que trabajó desde adentro resolviendo exactamente los problemas que hoy ofrecemos solucionar.</p>
+        <div class="about-points">
+          <div class="about-point">
+            <div class="about-divider"></div>
+            <h4>Conocimiento de industria, no solo de tecnología</h4>
+            <p>Entendemos cómo se toman decisiones de expansión en retail farmacéutico, qué datos son críticos y qué metodologías funcionan — porque las usamos internamente en empresas del sector.</p>
+          </div>
+          <div class="about-point">
+            <div class="about-divider"></div>
+            <h4>Infraestructura construida para escalar</h4>
+            <p>Toda solución se entrega como activo del cliente: código documentado, pipelines auditables y arquitectura que puede operar y mantener un equipo interno.</p>
+          </div>
+          <div class="about-point">
+            <div class="about-divider"></div>
+            <h4>Modelo de relación a largo plazo</h4>
+            <p>El objetivo no es cerrar un proyecto puntual. Es convertirse en el socio tecnológico de datos que la empresa necesita durante años.</p>
+          </div>
+        </div>
+        <div class="stack-row" style="margin-top:32px">
+          <div class="stack-item"><i data-lucide="cloud" style="width:14px;height:14px;color:var(--signal)"></i> Google Cloud</div>
+          <div class="stack-item"><i data-lucide="bar-chart-2" style="width:14px;height:14px;color:var(--signal)"></i> BigQuery</div>
+          <div class="stack-item"><i data-lucide="map" style="width:14px;height:14px;color:var(--signal)"></i> GeoPandas</div>
+          <div class="stack-item"><i data-lucide="bot" style="width:14px;height:14px;color:var(--signal)"></i> LLM Agents</div>
+          <div class="stack-item"><i data-lucide="code-2" style="width:14px;height:14px;color:var(--signal)"></i> Python</div>
+          <div class="stack-item"><i data-lucide="layout-dashboard" style="width:14px;height:14px;color:var(--signal)"></i> Looker Studio</div>
+        </div>
+      </div>
+      <div>
+        <div class="founder-card">
+          <div class="founder-header">
+            <div class="founder-avatar">N</div>
+            <div>
+              <div class="founder-name">Nichelson Churata N.</div>
+              <div class="founder-title">Fundador & Director de datos</div>
+            </div>
+          </div>
+          <p class="founder-bio">Analista de datos especializado en geoespacial, inteligencia comercial y automatización con IA. Ex-analista en FEMSA Salud (Socofar), donde desarrolló los pipelines de mapeo de competencia farmacéutica, análisis de expansión y datos demográficos que hoy forman el núcleo de REALI.</p>
+          <div class="exp-list">
+            <div class="exp-item"><div class="exp-dot"></div>Mapeo geoespacial de 5.915 farmacias a nivel nacional con precisión &lt;30m</div>
+            <div class="exp-item"><div class="exp-dot"></div>Análisis de expansión comercial para decisiones de apertura de locales en Chile</div>
+            <div class="exp-item"><div class="exp-dot"></div>Desarrollo de scrapers de POI para 12+ cadenas en Chile, Colombia y Ecuador</div>
+            <div class="exp-item"><div class="exp-dot"></div>Modelos de proyección de demanda con datos demográficos del Censo 2024</div>
+            <div class="exp-item"><div class="exp-dot"></div>Automatización de reportería comercial con agentes IA y pipelines GCP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section class="section contact-bg" id="contacto">
+  <div class="contact-glow"></div>
+  <div class="section-inner" style="position:relative">
+    <div class="contact-grid">
+      <div>
+        <div class="section-eyebrow">Habla con nosotros</div>
+        <h2 class="section-title">El primer paso es un diagnóstico sin compromiso</h2>
+        <p style="font-size:16px;color:var(--bone-muted);line-height:1.7;margin-bottom:12px">Cuéntanos el problema de datos que tienes. En 30 minutos te decimos si podemos resolverlo, cómo lo haríamos y qué costaría.</p>
+        <p style="font-size:14px;color:var(--bone-muted);line-height:1.7;margin-bottom:32px">Sin presentaciones genéricas. Sin propuestas estándar.</p>
+        <div class="contact-options">
+          <a class="contact-option" href="https://wa.me/56967871050" target="_blank" rel="noopener">
+            <div class="co-icon teal"><i data-lucide="message-circle" style="width:18px;height:18px"></i></div>
+            <div>
+              <div class="co-label">WhatsApp directo</div>
+              <div class="co-sub">+56 9 6787 1050 — respuesta en menos de 2 horas</div>
+            </div>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;color:var(--bone-muted);margin-left:auto"></i>
+          </a>
+          <a class="contact-option" href="mailto:nschurata@gmail.com">
+            <div class="co-icon amber"><i data-lucide="mail" style="width:18px;height:18px"></i></div>
+            <div>
+              <div class="co-label">Correo electrónico</div>
+              <div class="co-sub">nschurata@gmail.com</div>
+            </div>
+            <i data-lucide="arrow-right" style="width:16px;height:16px;color:var(--bone-muted);margin-left:auto"></i>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="contact-card">
+          <div style="font-family:var(--font-heading);font-size:18px;font-weight:700;margin-bottom:6px">Solicita un diagnóstico</div>
+          <p style="font-size:13px;color:var(--bone-muted)">Cuéntanos sobre tu empresa y el desafío de datos que enfrentas.</p>
+          <form id="diagnostic-form" class="contact-form" onsubmit="handleForm(event)">
+            <div class="form-row">
+              <div class="field">
+                <label>Nombre</label>
+                <input name="nombre" type="text" placeholder="Tu nombre" required>
+              </div>
+              <div class="field">
+                <label>Empresa</label>
+                <input name="empresa" type="text" placeholder="Razón social" required>
+              </div>
+            </div>
+            <div class="field">
+              <label>Correo</label>
+              <input name="correo" type="email" placeholder="correo@empresa.com" required>
+            </div>
+            <div class="field">
+              <label>Industria</label>
+              <select name="industria">
+                <option value="">Selecciona tu industria</option>
+                <option>Retail / Supermercados</option>
+                <option>Farmacias / Salud</option>
+                <option>Banca / Finanzas</option>
+                <option>E-commerce</option>
+                <option>Inmobiliaria</option>
+                <option>Logística</option>
+                <option>Otro</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>¿Cuál es tu desafío?</label>
+              <textarea name="desafio" placeholder="Ej: Necesitamos mapear la competencia en nuevas regiones antes de abrir locales..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">
+              <i data-lucide="send" style="width:15px;height:15px"></i>
+              Enviar solicitud
+            </button>
+          </form>
+          <div id="form-success" style="display:none;text-align:center;padding:32px 0">
+            <i data-lucide="check-circle" style="width:40px;height:40px;color:var(--signal);margin:0 auto 12px"></i>
+            <div style="font-weight:700;margin-bottom:6px">Solicitud enviada</div>
+            <p style="font-size:13px;color:var(--bone-muted)">Te contactamos en menos de 24 horas hábiles.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <img src="assets/wordmark-bone-light.png" alt="REALI">
+    </div>
+    <div style="font-size:13px;color:var(--bone-muted);text-align:center">
+      <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--signal)">Inteligencia de decisiones basada en datos</span><br>
+      Santiago, Chile — Infraestructura en Google Cloud Platform
+    </div>
+    <div class="footer-meta">
+      © 2026 REALI SpA<br>
+      nschurata@gmail.com<br>
+      +56 9 6787 1050
+    </div>
+  </div>
+</footer>
+
+<script>
+const WHATSAPP_NUMBER = '56967871050';
+
+lucide.createIcons();
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+  navLinks.forEach(a => {
+    a.style.color = a.getAttribute('href') === '#' + current ? 'var(--bone)' : '';
+  });
+}, { passive: true });
+
+function handleForm(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+
+  // TODO(human): build a WhatsApp message from `data` and open wa.me with it,
+  // then show the success state. Available fields: nombre, empresa, correo,
+  // industria, desafio. Use WHATSAPP_NUMBER as the destination.
+
+  e.target.style.display = 'none';
+  document.getElementById('form-success').style.display = 'block';
+  lucide.createIcons();
+}
+</script>
+
+</body>
+</html>
