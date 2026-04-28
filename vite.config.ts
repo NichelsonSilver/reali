@@ -5,11 +5,17 @@ export default defineConfig({
   plugins: [
     react(),
     {
-      name: 'serve-public-site-index',
+      name: 'reali-routing',
       configureServer(server) {
         server.middlewares.use((req, _res, next) => {
-          if (req.url && /^\/site\/?(\?.*)?$/.test(req.url)) {
+          if (!req.url) return next()
+          const path = req.url.split('?')[0]
+          if (path === '/' || path === '') {
             req.url = '/site/index.html'
+          } else if (path === '/site' || path === '/site/') {
+            req.url = '/site/index.html'
+          } else if (path === '/dashboard' || path === '/dashboard/') {
+            req.url = '/index.html'
           }
           next()
         })
