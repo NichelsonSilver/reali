@@ -1,4 +1,4 @@
-# REALI — Real Estate & Location Intelligence
+# REALI — Real Estate & Location Intelligence (https://reali.cl/)
 
 Dashboard interactivo de inteligencia geoespacial para la industria farmacéutica chilena.
 
