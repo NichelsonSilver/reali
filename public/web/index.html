@@ -199,6 +199,7 @@ footer{background:var(--graphite);border-top:1px solid rgba(255,255,255,0.06);pa
   .hero{padding:100px 24px 60px}
   .hero-grid{grid-template-columns:1fr}
   .hero-stats{grid-template-columns:1fr 1fr}
+  .hero-tagline-center{padding:0 24px 32px}
   .section{padding:72px 24px}
   .services-grid{grid-template-columns:1fr}
   .process-steps{grid-template-columns:1fr 1fr;gap:24px}
@@ -211,6 +212,72 @@ footer{background:var(--graphite);border-top:1px solid rgba(255,255,255,0.06);pa
   .footer-inner{flex-direction:column;gap:16px;text-align:center}
   .footer-meta{text-align:center}
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT THEME
+   ════════════════════════════════════════════════════════════ */
+body{background:#ffffff;color:#0B1A2E}
+.hero{flex-direction:column;justify-content:center;gap:0}
+.hero-tagline-center{width:100%;max-width:1280px;padding:0 48px 40px;text-align:center}
+.hero-sub{color:#6B7280}
+.hero .btn-ghost{color:#374151;border-color:rgba(0,0,0,0.18)}
+.hero .btn-ghost:hover{color:#0B1A2E;border-color:rgba(0,0,0,0.35)}
+.stat-card{background:#F4F6FA;border:1px solid rgba(0,0,0,0.08)}
+.stat-num{color:#0B1A2E}
+.stat-label{color:#6B7280}
+.stat-desc{color:#374151}
+.section-lead{color:#6B7280}
+.service-card{background:#F4F6FA;border:1px solid rgba(0,0,0,0.08)}
+.service-card:hover{border-color:rgba(0,224,208,0.3);transform:translateY(-3px)}
+.service-card.featured{border-color:rgba(0,224,208,0.2);background:linear-gradient(145deg,#EDF2FA,#F4F6FA)}
+.service-card h3{color:#0B1A2E}
+.service-card p{color:#6B7280}
+.process-bg{background:#F4F6FA}
+.process-steps::before{background:linear-gradient(90deg,transparent,rgba(0,0,0,0.08) 20%,var(--signal) 50%,rgba(0,0,0,0.08) 80%,transparent)}
+.step-dot{border:2px solid rgba(0,0,0,0.13);background:#ffffff}
+.step-dot.active{border-color:var(--signal);background:rgba(0,224,208,0.08);box-shadow:var(--shadow-signal)}
+.process-step h4{color:#0B1A2E}
+.process-step p{color:#6B7280}
+.case-card{background:#F4F6FA;border:1px solid rgba(0,0,0,0.08)}
+.case-card:hover{border-color:rgba(0,224,208,0.3)}
+.case-card h3{color:#0B1A2E}
+.case-card p{color:#6B7280}
+.security-bg{background:#ffffff}
+.security-header{border-bottom:1px solid rgba(0,0,0,0.08)}
+.gcp-badge{background:rgba(0,224,208,0.05);border:1px solid rgba(0,224,208,0.25)}
+.sec-metric{background:#F4F6FA;border:1px solid rgba(0,0,0,0.08)}
+.sec-metric .m-lbl{color:#6B7280}
+.pillar{background:#F4F6FA;border:1px solid rgba(0,0,0,0.08)}
+.pillar:hover{border-color:rgba(0,224,208,0.3)}
+.pillar h4{color:#0B1A2E}
+.pillar p{color:#6B7280}
+.pillar-tag{background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.08);color:#6B7280}
+.compliance-badge{background:#F4F6FA;border:1px solid rgba(0,0,0,0.10)}
+.compliance-badge span{color:#374151}
+.security-arch{background:#F4F6FA;border:1px solid rgba(0,0,0,0.08)}
+.arch-title{color:#374151}
+.arch-layer{border-bottom:1px solid rgba(0,0,0,0.06)}
+.layer-label{color:#6B7280}
+.layer-item{background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.08);color:#374151}
+.layer-item.accent{background:rgba(0,224,208,0.08);border-color:rgba(0,224,208,0.2);color:var(--signal-dim)}
+.about-bg{background:#F4F6FA}
+.founder-card{background:#ffffff;border:1px solid rgba(0,0,0,0.08)}
+.founder-bio{color:#6B7280}
+.exp-item{color:#374151}
+.about-point h4{color:#0B1A2E}
+.about-point p{color:#6B7280}
+.stack-item{background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.08);color:#374151}
+.contact-bg{background:#ffffff}
+.contact-card{background:#F4F6FA;border:1px solid rgba(0,224,208,0.18);box-shadow:var(--shadow-signal)}
+.contact-option{border:1px solid rgba(0,0,0,0.08);background:rgba(0,0,0,0.02)}
+.contact-option:hover{border-color:rgba(0,224,208,0.3);background:rgba(0,224,208,0.04);transform:translateX(4px)}
+.co-label{color:#0B1A2E}
+.co-sub{color:#6B7280}
+.field label{color:#6B7280}
+.field input,.field select,.field textarea{background:#ffffff;border:1px solid rgba(0,0,0,0.14);color:#0B1A2E}
+.field select option{background:#ffffff;color:#0B1A2E}
+[style*="var(--bone-muted)"]{color:#6B7280!important}
+[style*="var(--bone-dim)"]{color:#374151!important}
 </style>
 </head>
 <body>
@@ -219,6 +286,7 @@ footer{background:var(--graphite);border-top:1px solid rgba(255,255,255,0.06);pa
 <nav>
   <div class="nav-inner">
     <a class="nav-logo" href="#inicio">
+      <img src="/web/assets/logo-mark.png" alt="" style="height:24px;width:auto">
       <img src="/web/assets/wordmark-bone-light.png" alt="REALI">
     </a>
     <div class="nav-links">
@@ -245,9 +313,11 @@ footer{background:var(--graphite);border-top:1px solid rgba(255,255,255,0.06);pa
 <section class="hero" id="inicio">
   <div class="hero-glow"></div>
   <div class="hero-glow-2"></div>
+  <div class="hero-tagline-center">
+    <div class="hero-tag">Inteligencia de decisiones basada en datos</div>
+  </div>
   <div class="hero-grid">
     <div>
-      <div class="hero-tag">Inteligencia de decisiones basada en datos</div>
       <h1>Infraestructura de datos<br>a medida para <em>empresas que deciden con precisión</em></h1>
       <p class="hero-sub">Combinamos analítica geoespacial, automatización con IA e infraestructura en GCP para convertir datos complejos en ventajas competitivas reales.</p>
       <div class="hero-actions">
@@ -334,7 +404,7 @@ footer{background:var(--graphite);border-top:1px solid rgba(255,255,255,0.06);pa
         <span class="service-tag">Infraestructura</span>
       </div>
 
-      <div class="service-card" style="background:linear-gradient(145deg,rgba(0,224,208,0.05),var(--graphite));border-color:rgba(0,224,208,0.12)">
+      <div class="service-card" style="background:linear-gradient(145deg,rgba(0,224,208,0.05),#F4F6FA);border-color:rgba(0,224,208,0.2)">
         <div class="service-icon"><i data-lucide="trending-up" style="width:20px;height:20px"></i></div>
         <div class="service-num">06 — MODELOS PREDICTIVOS</div>
         <h3>Forecasting y scoring ML</h3>
@@ -680,11 +750,11 @@ footer{background:var(--graphite);border-top:1px solid rgba(255,255,255,0.06);pa
             </div>
             <i data-lucide="arrow-right" style="width:16px;height:16px;color:var(--bone-muted);margin-left:auto"></i>
           </a>
-          <a class="contact-option" href="mailto:nichelson@reali.cl">
+          <a class="contact-option" href="mailto:contacto@reali.cl">
             <div class="co-icon amber"><i data-lucide="mail" style="width:18px;height:18px"></i></div>
             <div>
               <div class="co-label">Correo electrónico</div>
-              <div class="co-sub">nichelson@reali.cl</div>
+              <div class="co-sub">contacto@reali.cl</div>
             </div>
             <i data-lucide="arrow-right" style="width:16px;height:16px;color:var(--bone-muted);margin-left:auto"></i>
           </a>
@@ -754,7 +824,7 @@ footer{background:var(--graphite);border-top:1px solid rgba(255,255,255,0.06);pa
     </div>
     <div class="footer-meta">
       © 2026 REALI SpA<br>
-      nichelson@reali.cl<br>
+      contacto@reali.cl<br>
       +56 9 6787 1050
     </div>
   </div>

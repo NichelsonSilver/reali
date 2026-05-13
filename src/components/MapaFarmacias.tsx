@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import type { Feature } from "geojson";
 import L from "leaflet";
@@ -124,8 +124,30 @@ function BuscadorEfecto({ resultado }: { resultado: ResultadoBusqueda | null }) 
   return null;
 }
 
+// Auto-centra el mapa en los datos visibles cada vez que cambia el filtrado.
+// Salta el primer render para no desplazar el encuadre inicial.
+function FitBounds({ farmacias }: { farmacias: Farmacia[] }) {
+  const map = useMap();
+  const isFirst = useRef(true);
+  useEffect(() => {
+    if (isFirst.current) { isFirst.current = false; return; }
+    if (!farmacias.length) return;
+    const b = L.latLngBounds(farmacias.map((f) => [f.lat, f.lon] as [number, number]));
+    if (b.isValid()) map.fitBounds(b, { padding: [50, 50], maxZoom: 14 });
+  }, [farmacias, map]);
+  return null;
+}
+
+// Color determinista por nombre de comuna para la capa de comunas.
+function hashColor(s: string): string {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
+  return `hsl(${((h >>> 0) % 360)},52%,42%)`;
+}
+
 interface Props {
   farmacias: Farmacia[];
+  onComunaClick?: (c: string) => void;
 }
 
 const TILES = {
@@ -144,15 +166,20 @@ const C = {
   text2: "#475569", text3: "#94a3b8", accent: "#2563eb",
 };
 
-export default function MapaFarmacias({ farmacias }: Props) {
+export default function MapaFarmacias({ farmacias, onComunaClick }: Props) {
   const [tile, setTile] = useState<TileKey>("claro");
   const [manzanasOn, setManzanasOn] = useState(false);
-  const [logosOn, setLogosOn] = useState(true);
+  const [comunasOn, setComunasOn] = useState(false);
+  const [logosOn, setLogosOn] = useState(false);
   const [variable, setVariable] = useState<VariableCoropleta>("pob");
   const [busqueda, setBusqueda] = useState("");
   const [buscando, setBuscando] = useState(false);
   const [errorBusqueda, setErrorBusqueda] = useState<string | null>(null);
   const [resultadoBusqueda, setResultadoBusqueda] = useState<ResultadoBusqueda | null>(null);
+
+  // Ref para que los handlers del GeoJSON de comunas siempre llamen la versión fresca del callback.
+  const onComunaClickRef = useRef(onComunaClick);
+  onComunaClickRef.current = onComunaClick;
 
   async function buscarDireccion() {
     const q = busqueda.trim();
@@ -179,9 +206,9 @@ export default function MapaFarmacias({ farmacias }: Props) {
     }
   }
 
-  const { data: manzanas, loading: loadingManz } = useManzanasRM(manzanasOn);
+  // Descarga manzanas cuando se activa cualquiera de las dos capas que lo necesita.
+  const { data: manzanas, loading: loadingManz } = useManzanasRM(manzanasOn || comunasOn);
 
-  // Recalcular style sólo cuando cambia la variable (evita redibujar Leaflet si no hace falta).
   const estiloManzana = useMemo(
     () => (feat?: Feature) => {
       const props = (feat?.properties ?? {}) as ManzanaProps;
@@ -195,6 +222,15 @@ export default function MapaFarmacias({ farmacias }: Props) {
     [variable],
   );
 
+  const estiloComunas = useMemo(
+    () => (feat?: Feature) => {
+      const p = (feat?.properties ?? {}) as ManzanaProps;
+      const color = hashColor(p.comuna ?? "");
+      return { fillColor: color, fillOpacity: 0.18, color, weight: 1.5 };
+    },
+    [],
+  );
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <MapContainer
@@ -206,7 +242,27 @@ export default function MapaFarmacias({ farmacias }: Props) {
       >
         <TileLayer key={tile} url={TILES[tile].url} attribution={TILES[tile].attr} maxZoom={19} />
 
-        {/* Coropleta manzanas (se descarga lazy al activar el toggle) */}
+        {/* Auto-centra el mapa al filtrar */}
+        <FitBounds farmacias={farmacias} />
+
+        {/* Capa comunas — colorea manzanas por nombre de comuna; clic filtra */}
+        {comunasOn && manzanas && (
+          <GeoJSON
+            key="comunas"
+            data={manzanas}
+            style={estiloComunas}
+            onEachFeature={(feat, layer) => {
+              const p = feat.properties as ManzanaProps;
+              layer.bindTooltip(
+                `<b>${p.comuna}</b><br/><span style="font-size:10px;color:#6b7280">Clic para filtrar por esta comuna</span>`,
+                { sticky: true, direction: "top" },
+              );
+              layer.on("click", () => { onComunaClickRef.current?.(p.comuna); });
+            }}
+          />
+        )}
+
+        {/* Coropleta manzanas (demografía) */}
         {manzanasOn && manzanas && (
           <GeoJSON
             key={`manz-${variable}`}
@@ -221,7 +277,6 @@ export default function MapaFarmacias({ farmacias }: Props) {
             }}
           />
         )}
-
 
         <FarmaciasLayer farmacias={farmacias} logosOn={logosOn} />
         <BuscadorEfecto resultado={resultadoBusqueda} />
@@ -303,7 +358,7 @@ export default function MapaFarmacias({ farmacias }: Props) {
       <div style={{
         position: "absolute", top: 54, left: 12, zIndex: 400,
         background: "rgba(255,255,255,0.95)", border: `1px solid ${C.border}`,
-        borderRadius: 8, padding: "8px 10px", minWidth: 190,
+        borderRadius: 8, padding: "8px 10px", minWidth: 200,
         boxShadow: "0 2px 8px rgba(0,0,0,0.08)", backdropFilter: "blur(4px)",
       }}>
         <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: C.text3, marginBottom: 6 }}>
@@ -316,8 +371,13 @@ export default function MapaFarmacias({ farmacias }: Props) {
         </label>
 
         <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.text2, cursor: "pointer", marginBottom: 4 }}>
+          <input type="checkbox" checked={comunasOn} onChange={(e) => setComunasOn(e.target.checked)} />
+          Comunas {loadingManz && comunasOn && <span style={{ color: C.text3 }}>· cargando…</span>}
+        </label>
+
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.text2, cursor: "pointer", marginBottom: 4 }}>
           <input type="checkbox" checked={manzanasOn} onChange={(e) => setManzanasOn(e.target.checked)} />
-          Manzanas censo 2024 {loadingManz && <span style={{ color: C.text3 }}>· cargando…</span>}
+          Manzanas censo 2024 {loadingManz && manzanasOn && <span style={{ color: C.text3 }}>· cargando…</span>}
         </label>
 
         {manzanasOn && (
@@ -345,7 +405,6 @@ export default function MapaFarmacias({ farmacias }: Props) {
             </div>
           </div>
         )}
-
       </div>
 
       {/* Count badge */}
@@ -358,7 +417,7 @@ export default function MapaFarmacias({ farmacias }: Props) {
         <span style={{ color: C.accent, fontWeight: 700 }}>{farmacias.length}</span> locales visibles
       </div>
 
-      {/* Leyenda */}
+      {/* Leyenda cadenas */}
       <div style={{
         position: "absolute", bottom: 14, right: 14, zIndex: 400,
         background: "rgba(255,255,255,0.95)", border: `1px solid ${C.border}`,

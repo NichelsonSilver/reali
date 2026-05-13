@@ -6,15 +6,16 @@ import PanelIzquierdo from "./components/PanelIzquierdo";
 import UploadModal from "./components/UploadModal";
 import PageMovimientos from "./components/PageMovimientos";
 import PageCadenas from "./components/PageCadenas";
+import PageDemografia from "./components/PageDemografia";
 import PasswordGate from "./components/PasswordGate";
 
 const MapaFarmacias = lazy(() => import("./components/MapaFarmacias"));
 
-type Page = "mapa" | "movimientos" | "cadenas";
+type Page = "mapa" | "movimientos" | "cadenas" | "demografia";
 
-interface Filtros { cadena: string; region: string; comuna: string; }
+interface Filtros { cadenas: string[]; region: string; comuna: string; }
 
-const FILTROS_VACIOS: Filtros = { cadena: "", region: "", comuna: "" };
+const FILTROS_VACIOS: Filtros = { cadenas: [], region: "", comuna: "" };
 
 const C = {
   bg: "#f8fafc", bgCard: "#fff", border: "#e2e8f0",
@@ -62,32 +63,62 @@ function IChevL() {
 function IChevR() {
   return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>;
 }
+function IUsers() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  );
+}
 
 // ── Nav Sidebar ──────────────────────────────────────────────────────────────
 
 function NavSidebar({ page, setPage }: { page: Page; setPage: (p: Page) => void }) {
+  const [open, setOpen] = useState(true);
+  const W = open ? 204 : 48;
+
   const items: { id: Page; label: string; icon: React.ReactNode }[] = [
-    { id: "mapa",        label: "Mapa Farmacéutico",   icon: <IMap /> },
-    { id: "movimientos", label: "Aperturas / Cierres", icon: <IBar /> },
-    { id: "cadenas",     label: "Cadenas Principales", icon: <IGrid /> },
+    { id: "mapa",        label: "Mapa Farmacéutico",    icon: <IMap /> },
+    { id: "movimientos", label: "Aperturas / Cierres",  icon: <IBar /> },
+    { id: "cadenas",     label: "Cadenas Principales",  icon: <IGrid /> },
+    { id: "demografia",  label: "Análisis Demográfico", icon: <IUsers /> },
   ];
+
   return (
-    <nav style={{ width: 204, flexShrink: 0, background: C.nav, display: "flex", flexDirection: "column", padding: "0 10px 14px" }}>
-      <div style={{ padding: "20px 8px 20px" }}>
-        <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.03em", color: "#fff", lineHeight: 1 }}>REALI</div>
-        <div style={{ fontSize: 9, color: "#475569", marginTop: 3, letterSpacing: "0.05em", textTransform: "uppercase" }}>Intel. Territorial Farm.</div>
+    <nav style={{
+      width: W, minWidth: W, flexShrink: 0, background: C.nav,
+      display: "flex", flexDirection: "column",
+      padding: open ? "0 10px 14px" : "0 6px 14px",
+      overflow: "hidden",
+      transition: "width 0.22s cubic-bezier(.4,0,.2,1), min-width 0.22s cubic-bezier(.4,0,.2,1)",
+    }}>
+      <div style={{ padding: "20px 0 20px", display: "flex", flexDirection: "column", alignItems: open ? "flex-start" : "center", paddingLeft: open ? 8 : 0 }}>
+        {open ? (
+          <>
+            <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.03em", color: "#fff", lineHeight: 1 }}>REALI</div>
+            <div style={{ fontSize: 9, color: "#475569", marginTop: 3, letterSpacing: "0.05em", textTransform: "uppercase" }}>Intel. Territorial Farm.</div>
+          </>
+        ) : (
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>R</div>
+        )}
       </div>
 
-      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: "#334155", padding: "0 10px", marginBottom: 5 }}>Plataforma</div>
+      {open && <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: "#334155", padding: "0 10px", marginBottom: 5 }}>Plataforma</div>}
+
       <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
         {items.map((item) => (
           <div
             key={item.id}
+            title={!open ? item.label : undefined}
             onClick={() => setPage(item.id)}
             style={{
-              display: "flex", alignItems: "center", gap: 8,
-              padding: "7px 10px", borderRadius: 6,
-              cursor: "pointer", fontSize: 12, fontWeight: 500,
+              display: "flex", alignItems: "center", gap: open ? 8 : 0,
+              padding: open ? "7px 10px" : "7px 0",
+              justifyContent: open ? "flex-start" : "center",
+              borderRadius: 6, cursor: "pointer", fontSize: 12, fontWeight: 500,
               color: page === item.id ? "#fff" : "#94a3b8",
               background: page === item.id ? "rgba(255,255,255,0.12)" : "transparent",
               transition: "all 0.12s", whiteSpace: "nowrap", userSelect: "none",
@@ -95,15 +126,30 @@ function NavSidebar({ page, setPage }: { page: Page; setPage: (p: Page) => void 
             onMouseEnter={(e) => { if (page !== item.id) { e.currentTarget.style.color = "#e2e8f0"; e.currentTarget.style.background = "rgba(255,255,255,0.07)"; } }}
             onMouseLeave={(e) => { if (page !== item.id) { e.currentTarget.style.color = "#94a3b8"; e.currentTarget.style.background = "transparent"; } }}
           >
-            <span style={{ opacity: 0.75 }}>{item.icon}</span>
-            {item.label}
+            <span style={{ opacity: 0.75, flexShrink: 0 }}>{item.icon}</span>
+            {open && item.label}
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: "auto", padding: "14px 8px 0", borderTop: `1px solid ${C.navBorder}` }}>
-        <div style={{ fontSize: 10, color: "#334155" }}>FEMSA Salud · Chile</div>
-        <div style={{ fontSize: 9, color: "#1e293b", marginTop: 1 }}>v0.9 · beta</div>
+      <div style={{ marginTop: "auto", padding: open ? "14px 8px 0" : "14px 0 0", borderTop: `1px solid ${C.navBorder}` }}>
+        {open && (
+          <>
+            <div style={{ fontSize: 10, color: "#334155" }}>FEMSA Salud · Chile</div>
+            <div style={{ fontSize: 9, color: "#1e293b", marginTop: 1 }}>v0.9 · beta</div>
+          </>
+        )}
+        <button
+          onClick={() => setOpen((o) => !o)}
+          title={open ? "Contraer menú" : "Expandir menú"}
+          style={{
+            marginTop: open ? 10 : 0, width: "100%", background: "none", border: "none",
+            cursor: "pointer", color: "#475569",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: "4px 0",
+          }}
+        >
+          {open ? <IChevL /> : <IChevR />}
+        </button>
       </div>
     </nav>
   );
@@ -116,6 +162,7 @@ function Header({ page, count, total, onUpload }: { page: Page; count: number; t
     mapa: "Mapa Farmacéutico",
     movimientos: "Registro de Aperturas y Cierres",
     cadenas: "Cadenas Principales — Aperturas 2026",
+    demografia: "Análisis Demográfico",
   };
   return (
     <header style={{ height: 52, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", background: C.bgCard, flexShrink: 0 }}>
@@ -158,16 +205,24 @@ function PageMapa({
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS);
   const [uploadedFiles, setUploadedFiles] = useState<{ name: string }[]>([]);
 
-  const filtradas = useMemo(() => {
-    const result = farmacias.filter((f) => {
-      if (filtros.cadena && f.cadena !== filtros.cadena) return false;
+  // Primera pasada: región + comuna (sin cadena) — usada por el gráfico del panel.
+  const farmaciasSinCadena = useMemo(
+    () => farmacias.filter((f) => {
       if (filtros.region && f.region !== filtros.region) return false;
       if (filtros.comuna && f.comuna !== filtros.comuna) return false;
       return true;
-    });
+    }),
+    [farmacias, filtros.region, filtros.comuna],
+  );
+
+  // Segunda pasada: aplica filtro de cadenas sobre el resultado anterior.
+  const filtradas = useMemo(() => {
+    const result = farmaciasSinCadena.filter((f) =>
+      filtros.cadenas.length === 0 || filtros.cadenas.includes(f.cadena),
+    );
     onCountChange(result.length);
     return result;
-  }, [farmacias, filtros]);
+  }, [farmaciasSinCadena, filtros.cadenas]);
 
   const comunas = useMemo(() => [...new Set(farmacias.map((f) => f.comuna))].sort(), [farmacias]);
   const regiones = useMemo(() => [...new Set(farmacias.map((f) => f.region))].sort(), [farmacias]);
@@ -184,6 +239,7 @@ function PageMapa({
         {panelOpen && !loading && !error && (
           <PanelIzquierdo
             farmacias={filtradas}
+            farmaciasSinCadena={farmaciasSinCadena}
             demografia={demografia}
             comunasDisponibles={comunas}
             regionesDisponibles={regiones}
@@ -232,7 +288,10 @@ function PageMapa({
               <div style={{ width: 32, height: 32, border: "2px solid #2563eb", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
             </div>
           }>
-            <MapaFarmacias farmacias={filtradas} />
+            <MapaFarmacias
+              farmacias={filtradas}
+              onComunaClick={(c) => setFiltros((prev) => ({ ...prev, comuna: c }))}
+            />
           </Suspense>
         )}
       </div>
@@ -292,6 +351,7 @@ export default function App() {
           )}
           {page === "movimientos" && <PageMovimientos />}
           {page === "cadenas" && <PageCadenas />}
+          {page === "demografia" && <PageDemografia farmacias={farmacias} demografia={demografia} />}
         </div>
       </div>
     </div>

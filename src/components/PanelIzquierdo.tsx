@@ -3,10 +3,11 @@ import { Farmacia } from "../types";
 import { DemografiaCenso } from "../hooks/useDemografia";
 import { CADENAS, COLORES_CADENA } from "../constants";
 
-interface Filtros { cadena: string; region: string; comuna: string; }
+interface Filtros { cadenas: string[]; region: string; comuna: string; }
 
 interface Props {
   farmacias: Farmacia[];
+  farmaciasSinCadena: Farmacia[];
   demografia: DemografiaCenso[];
   comunasDisponibles: string[];
   regionesDisponibles: string[];
@@ -22,21 +23,50 @@ const C = {
   accent: "#2563eb",
 };
 
-function HBarChart({ data }: { data: { nombre: string; cantidad: number; color: string }[] }) {
+function HBarChart({
+  data,
+  selected,
+  onToggle,
+}: {
+  data: { nombre: string; cantidad: number; color: string }[];
+  selected?: string[];
+  onToggle?: (name: string) => void;
+}) {
   const max = Math.max(...data.map((d) => d.cantidad), 1);
-  const ROW = 24;
-  const LW = 90;
+  const ROW = 27;
+  const LW = 78;
+  const anySelected = (selected?.length ?? 0) > 0;
   return (
     <div style={{ position: "relative", height: data.length * ROW }}>
-      {data.map((d, i) => (
-        <div key={d.nombre} style={{ position: "absolute", top: i * ROW, left: 0, right: 0, height: ROW - 4, display: "flex", alignItems: "center", gap: 6 }}>
-          <div style={{ width: LW, fontSize: 10.5, color: C.text2, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.nombre}</div>
-          <div style={{ flex: 1, height: 8, background: C.bg2, borderRadius: 4, overflow: "hidden" }}>
-            <div style={{ width: `${(d.cantidad / max) * 100}%`, height: "100%", background: d.color, borderRadius: 4, transition: "width 0.4s", opacity: 0.85 }} />
+      {data.map((d, i) => {
+        const isSelected = selected?.includes(d.nombre) ?? false;
+        const dimmed = anySelected && !isSelected;
+        return (
+          <div
+            key={d.nombre}
+            onClick={() => onToggle?.(d.nombre)}
+            style={{
+              position: "absolute", top: i * ROW, left: 0, right: 0,
+              height: ROW - 4, display: "flex", alignItems: "center", gap: 6,
+              cursor: onToggle ? "pointer" : "default",
+              borderRadius: 5, padding: "0 4px",
+              opacity: dimmed ? 0.38 : 1,
+              transition: "opacity 0.15s",
+            }}
+          >
+            <div style={{ width: LW, fontSize: 10.5, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: isSelected ? 700 : 400, color: isSelected ? d.color : "#94a3b8", transition: "color 0.15s, font-weight 0.15s" }}>
+              {d.nombre}
+            </div>
+            <div style={{ flex: 1, height: 8, background: C.bg2, borderRadius: 4, overflow: "hidden" }}>
+              <div style={{ width: `${(d.cantidad / max) * 100}%`, height: "100%", background: d.color, borderRadius: 4, transition: "width 0.4s", opacity: 0.85 }} />
+            </div>
+            <div style={{ width: 28, fontSize: 10.5, color: C.text2, fontWeight: 600, textAlign: "right", flexShrink: 0 }}>
+              {d.cantidad}
+            </div>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", flexShrink: 0, border: `2px solid ${isSelected ? d.color : "#cbd5e1"}`, background: isSelected ? d.color : "transparent", transition: "all 0.15s" }} />
           </div>
-          <div style={{ width: 24, fontSize: 10.5, color: C.text2, fontWeight: 600, textAlign: "right", flexShrink: 0 }}>{d.cantidad}</div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -55,15 +85,15 @@ const selSt: React.CSSProperties = {
 };
 
 export default function PanelIzquierdo({
-  farmacias, demografia, comunasDisponibles, regionesDisponibles,
+  farmacias, farmaciasSinCadena, demografia, comunasDisponibles, regionesDisponibles,
   filtros, onChange, uploadedFiles, onRemoveFile,
 }: Props) {
-  const hayFiltros = filtros.cadena || filtros.region || filtros.comuna;
+  const hayFiltros = filtros.cadenas.length > 0 || filtros.region || filtros.comuna;
 
   const datosCadena = useMemo(() => {
     const conteo: Record<string, number> = {};
     for (const c of CADENAS) conteo[c] = 0;
-    for (const f of farmacias) {
+    for (const f of farmaciasSinCadena) {
       if (conteo[f.cadena] !== undefined) conteo[f.cadena]++;
       else conteo["Otra"]++;
     }
@@ -71,7 +101,7 @@ export default function PanelIzquierdo({
       .map((c) => ({ nombre: c, cantidad: conteo[c] ?? 0, color: COLORES_CADENA[c] }))
       .filter((d) => d.cantidad > 0)
       .sort((a, b) => b.cantidad - a.cantidad);
-  }, [farmacias]);
+  }, [farmaciasSinCadena]);
 
   const resumenDemo = useMemo(() => {
     if (!demografia.length) return null;
@@ -104,35 +134,35 @@ export default function PanelIzquierdo({
 
   const secTitle: React.CSSProperties = {
     fontSize: 10, fontWeight: 600, letterSpacing: "0.07em", color: C.text3,
-    textTransform: "uppercase", marginBottom: 8,
+    textTransform: "uppercase", marginBottom: 0,
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflowY: "auto", background: C.bg }}>
+
       {/* Filtros */}
       <section style={{ padding: "14px 14px 12px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: C.text }}>Filtros</span>
           {hayFiltros && (
             <button
-              onClick={() => onChange({ cadena: "", region: "", comuna: "" })}
+              onClick={() => onChange({ cadenas: [], region: "", comuna: "" })}
               style={{ fontSize: 10, color: C.accent, background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}
             >
-              Limpiar
+              Limpiar todo
             </button>
           )}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {[
-            { label: "Cadena",  key: "cadena",  opts: CADENAS as string[],       ph: "Todas las cadenas"  },
-            { label: "Región",  key: "region",  opts: regionesDisponibles,        ph: "Todas las regiones" },
-            { label: "Comuna",  key: "comuna",  opts: comunasDisponibles,         ph: "Todas las comunas"  },
+            { label: "Región", key: "region", opts: regionesDisponibles, ph: "Todas las regiones" },
+            { label: "Comuna", key: "comuna", opts: comunasDisponibles,  ph: "Todas las comunas"  },
           ].map(({ label, key, opts, ph }) => (
             <div key={key}>
               <label style={labelSt}>{label}</label>
               <select
                 style={selSt}
-                value={filtros[key as keyof Filtros]}
+                value={filtros[key as "region" | "comuna"]}
                 onChange={(e) => onChange({ ...filtros, [key]: e.target.value })}
               >
                 <option value="">{ph}</option>
@@ -149,7 +179,7 @@ export default function PanelIzquierdo({
       {uploadedFiles.length > 0 && (
         <>
           <section style={{ padding: "12px 14px 10px" }}>
-            <div style={secTitle}>Capas cargadas</div>
+            <div style={{ ...secTitle, marginBottom: 8 }}>Capas cargadas</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {uploadedFiles.map((f, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 8px", background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 6 }}>
@@ -168,17 +198,36 @@ export default function PanelIzquierdo({
         </>
       )}
 
-      {/* Gráfico cadenas */}
+      {/* Gráfico cadenas — multiselect interactivo */}
       <section style={{ padding: "12px 14px" }}>
-        <div style={secTitle}>Farmacias por cadena</div>
-        <HBarChart data={datosCadena} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+          <div style={secTitle}>Farmacias por cadena</div>
+          {filtros.cadenas.length > 0 && (
+            <button
+              onClick={() => onChange({ ...filtros, cadenas: [] })}
+              style={{ fontSize: 9, color: C.accent, background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}
+            >
+              Limpiar ({filtros.cadenas.length})
+            </button>
+          )}
+        </div>
+        <HBarChart
+          data={datosCadena}
+          selected={filtros.cadenas}
+          onToggle={(nombre) => {
+            const cadenas = filtros.cadenas.includes(nombre)
+              ? filtros.cadenas.filter((c) => c !== nombre)
+              : [...filtros.cadenas, nombre];
+            onChange({ ...filtros, cadenas });
+          }}
+        />
       </section>
 
       <div style={{ borderTop: `1px solid ${C.border}` }} />
 
       {/* KPIs */}
       <section style={{ padding: "12px 14px" }}>
-        <div style={secTitle}>Resumen</div>
+        <div style={{ ...secTitle, marginBottom: 8 }}>Resumen</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
           {[
             { label: "Farmacias", val: kpis.farmacias.toLocaleString("es-CL") },
@@ -198,7 +247,7 @@ export default function PanelIzquierdo({
 
       {/* Demografía */}
       <section style={{ padding: "12px 14px 16px" }}>
-        <div style={secTitle}>Demografía — Censo 2024</div>
+        <div style={{ ...secTitle, marginBottom: 8 }}>Demografía — Censo 2024</div>
         {resumenDemo ? (
           <>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5, marginBottom: 10 }}>
