@@ -91,6 +91,41 @@ export default function PageDemografia({ farmacias, demografia }: Props) {
       .map((item, i) => ({ ...item, color: BLUES[i] }));
   }, [farmacias, demografia]);
 
+  const topAdultosMayores = useMemo(() => {
+    if (!demografia.length) return [];
+    return [...demografia]
+      .filter((d) => d.poblacion > 0)
+      .map((d) => ({
+        comuna: d.nombre_comuna,
+        pct: (d.edad_60_mas / d.poblacion) * 100,
+        color: "#fb923c"
+      }))
+      .sort((a, b) => b.pct - a.pct)
+      .slice(0, 10);
+  }, [demografia]);
+
+  const gseData = useMemo(() => {
+    if (!demografia.length) return [];
+    let abc1 = 0, c2 = 0, c3 = 0, dClass = 0, eClass = 0;
+    for (const d of demografia) {
+      if (d.poblacion <= 0) continue;
+      const esc = d.escolaridad_promedio;
+      if (esc >= 13.5) abc1 += d.poblacion;
+      else if (esc >= 12.5) c2 += d.poblacion;
+      else if (esc >= 11.0) c3 += d.poblacion;
+      else if (esc >= 9.5) dClass += d.poblacion;
+      else eClass += d.poblacion;
+    }
+    const total = abc1 + c2 + c3 + dClass + eClass || 1;
+    return [
+      { name: "ABC1 (Alto)", value: Math.round((abc1 / total) * 100), color: "#10b981" },
+      { name: "C2 (Medio Alto)", value: Math.round((c2 / total) * 100), color: "#3b82f6" },
+      { name: "C3 (Medio)", value: Math.round((c3 / total) * 100), color: "#f59e0b" },
+      { name: "D (Vulnerable)", value: Math.round((dClass / total) * 100), color: "#f97316" },
+      { name: "E (Pobreza)", value: Math.round((eClass / total) * 100), color: "#ef4444" },
+    ].filter(item => item.value > 0);
+  }, [demografia]);
+
   const kpiItems = kpis ? [
     { label: "Población total",       val: kpis.poblacion,    color: "#2563eb" },
     { label: "Farmacias / 100k hab",  val: kpis.farmPor100k,  color: "#7c3aed" },
@@ -158,6 +193,50 @@ export default function PageDemografia({ farmacias, demografia }: Props) {
                 contentStyle={{ fontSize: 11, border: `1px solid ${C.border}`, borderRadius: 6 }}
               />
             </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Charts row 2: GSE y Adultos Mayores */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+        {/* GSE */}
+        <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 10, padding: "16px 20px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+          <div style={secTitle}>Estrato Socioeconómico Predominante (GSE)</div>
+          <ResponsiveContainer width="100%" height={240}>
+            <PieChart>
+              <Pie
+                data={gseData} dataKey="value"
+                cx="50%" cy="50%"
+                innerRadius={60} outerRadius={90}
+                paddingAngle={3}
+                label={({ name, value }) => `${name} ${value}%`}
+                labelLine={false}
+              >
+                {gseData.map((g) => <Cell key={g.name} fill={g.color} />)}
+              </Pie>
+              <Tooltip
+                formatter={(v) => [v + "%", "Población"]}
+                contentStyle={{ fontSize: 11, border: `1px solid ${C.border}`, borderRadius: 6 }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Adultos mayores */}
+        <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 10, padding: "16px 20px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+          <div style={secTitle}>Top 10 comunas — % Adultos Mayores (60+)</div>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={topAdultosMayores} layout="vertical" margin={{ top: 0, right: 20, left: 80, bottom: 0 }}>
+              <XAxis type="number" tick={{ fontSize: 10, fill: C.text3 }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="comuna" tick={{ fontSize: 11, fill: C.text3 }} axisLine={false} tickLine={false} width={80} />
+              <Tooltip
+                formatter={(v: number) => [v.toFixed(1) + "%", "Adultos Mayores"]}
+                contentStyle={{ fontSize: 11, border: `1px solid ${C.border}`, borderRadius: 6 }}
+              />
+              <Bar dataKey="pct" radius={[0, 4, 4, 0]}>
+                {topAdultosMayores.map((d) => <Cell key={d.comuna} fill={d.color} />)}
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
