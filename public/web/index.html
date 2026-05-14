@@ -188,6 +188,19 @@ footer{background:var(--graphite);border-top:1px solid rgba(255,255,255,0.06);pa
 .footer-logo img{height:24px}
 .footer-meta{font-family:var(--font-mono);font-size:11px;color:var(--bone-muted);text-align:right;line-height:1.8}
 
+/* FAQ */
+.faq-bg{background:var(--graphite)}
+.faq-list{margin-top:56px;display:flex;flex-direction:column;gap:0}
+.faq-item{border-bottom:1px solid rgba(255,255,255,0.06);overflow:hidden}
+.faq-item:first-child{border-top:1px solid rgba(255,255,255,0.06)}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;padding:24px 0;background:none;border:none;cursor:pointer;text-align:left;gap:16px;color:var(--bone);font-family:inherit}
+.faq-q span{font-family:var(--font-heading);font-size:17px;font-weight:600;line-height:1.4}
+.faq-chevron{color:var(--signal);flex-shrink:0;transition:transform 300ms ease}
+.faq-item.open .faq-chevron{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 350ms ease}
+.faq-item.open .faq-a{max-height:300px}
+.faq-a p{font-size:15px;color:var(--bone-muted);line-height:1.7;padding-bottom:24px}
+
 /* SCROLL ANIM */
 .fade-up{opacity:0;transform:translateY(28px);transition:opacity 600ms ease,transform 600ms ease}
 .fade-up.visible{opacity:1;transform:none}
@@ -278,6 +291,12 @@ body{background:#ffffff;color:#0B1A2E}
 .field select option{background:#ffffff;color:#0B1A2E}
 [style*="var(--bone-muted)"]{color:#6B7280!important}
 [style*="var(--bone-dim)"]{color:#374151!important}
+.faq-bg{background:#F4F6FA}
+.faq-item{border-bottom:1px solid rgba(0,0,0,0.08)}
+.faq-item:first-child{border-top:1px solid rgba(0,0,0,0.08)}
+.faq-q{color:#0B1A2E}
+.faq-q span{color:#0B1A2E}
+.faq-a p{color:#6B7280}
 </style>
 </head>
 <body>
@@ -294,6 +313,7 @@ body{background:#ffffff;color:#0B1A2E}
       <a href="#casos">Casos de uso</a>
       <a href="#seguridad">Seguridad</a>
       <a href="#nosotros">Nosotros</a>
+      <a href="#faq">FAQ</a>
       <a href="#contacto">Contacto</a>
     </div>
     <div class="nav-cta">
@@ -729,6 +749,98 @@ body{background:#ffffff;color:#0B1A2E}
   </div>
 </section>
 
+<!-- FAQ -->
+<section class="section faq-bg" id="faq">
+  <div class="section-inner">
+    <div class="section-eyebrow">Preguntas frecuentes</div>
+    <h2 class="section-title">Lo que nos preguntan<br>antes de empezar</h2>
+    <p class="section-lead">Respuestas directas a las dudas más comunes sobre cómo trabajamos, qué entregamos y cómo protegemos los datos del cliente.</p>
+    <div class="faq-list fade-up">
+
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>¿Qué tipo de empresas trabajan con REALI?</span>
+          <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+        </button>
+        <div class="faq-a">
+          <p>Empresas con operaciones activas que necesitan datos de mercado, análisis de expansión o automatización de procesos de datos. Trabajamos principalmente con retail, farmacias, banca, e-commerce y logística. No tenemos paquetes mínimos obligatorios — el alcance lo define el diagnóstico inicial.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>¿Cuánto tiempo toma la primera entrega?</span>
+          <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+        </button>
+        <div class="faq-a">
+          <p>Depende del alcance. Un dataset de inteligencia de mercado listo para usar puede estar disponible en 1–2 semanas. Un proyecto de infraestructura completa en GCP toma entre 4 y 8 semanas. El diagnóstico inicial es gratuito y define los plazos exactos antes de comprometer recursos.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>¿Los datos que entrego son compartidos con otros clientes?</span>
+          <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+        </button>
+        <div class="faq-a">
+          <p>No. Cada cliente opera en una VPC privada dedicada en GCP, completamente aislada de otros entornos. Los datos que nos entrega — y los que generamos para tu empresa — son activos exclusivos que nunca se mezclan ni se reutilizan en otros proyectos.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>¿Necesito equipo técnico interno para trabajar con REALI?</span>
+          <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+        </button>
+        <div class="faq-a">
+          <p>No es requisito. Los dashboards están diseñados para usuarios de negocio — sin SQL ni configuración técnica. Si tienes equipo técnico, entregamos la arquitectura documentada y los pipelines auditables para que puedan operar de forma autónoma. Si no tienes equipo, nosotros operamos.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>¿Cómo funciona el modelo de precios?</span>
+          <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+        </button>
+        <div class="faq-a">
+          <p>Según el tipo de servicio: los datos de mercado tienen precio por dataset o por suscripción de actualización mensual; los proyectos de análisis se cotizan por alcance; la infraestructura y automatización operan en retainer mensual. Todo se define en el diagnóstico — sin sorpresas.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>¿Qué diferencia a REALI de una consultora de datos genérica?</span>
+          <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+        </button>
+        <div class="faq-a">
+          <p>Conocimiento de industria real, no solo de tecnología. El fundador desarrolló los pipelines de expansión farmacéutica desde dentro de FEMSA Salud — no como consultor externo. Eso significa que entendemos el problema antes de proponer la solución, y que no cobramos horas de "aprendizaje" del negocio del cliente.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>¿Puedo contratar solo los datos sin la infraestructura?</span>
+          <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+        </button>
+        <div class="faq-a">
+          <p>Sí. Puedes contratar solo el dataset de farmacias, solo el análisis de expansión para una región específica, o la arquitectura completa con pipelines activos. Los servicios son modulares — contratas lo que resuelve tu problema hoy, y puedes escalar después.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>¿Dónde se almacenan mis datos?</span>
+          <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+        </button>
+        <div class="faq-a">
+          <p>En Google Cloud Platform, en la región que el cliente defina. Por defecto <span style="font-family:var(--font-mono);font-size:13px">us-central1</span>, con opción <span style="font-family:var(--font-mono);font-size:13px">southamerica-east1</span> (São Paulo) para cumplimiento de residencia en LATAM. No hay movimiento de datos no autorizado ni entre regiones sin consentimiento explícito.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <!-- CONTACTO -->
 <section class="section contact-bg" id="contacto">
   <div class="contact-glow"></div>
@@ -847,6 +959,16 @@ window.addEventListener('scroll', () => {
     a.style.color = a.getAttribute('href') === '#' + current ? 'var(--bone)' : '';
   });
 }, { passive: true });
+
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+    lucide.createIcons();
+  });
+});
 
 function handleForm(e) {
   e.preventDefault();
